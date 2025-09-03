@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Weekly Shift Scheduler</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Weekly Shift Scheduler</h1>
+      <p class="sub">Auto-generated roster with all rule validation. Use the week tabs, regenerate, or download to Excel.</p>
+    </header>
+
+    <div class="toolbar">
+      <button id="regen">Regenerate roster</button>
+      <button id="dl">Download visible week ⇩</button>
+    </div>
+
+    <nav id="tabs" class="tabs"></nav>
+    <main id="weeks"></main>
+
+    <footer>Made with ❤️ by Shraddha Patil.</footer>
+  </div>
+
+  <!-- subtle glow for primary buttons -->
+  <svg width="0" height="0"><defs>
+    <filter id="btnGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs></svg>
+
+  <script src="logic.js"></script>
+</body>
+</html>

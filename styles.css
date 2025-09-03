@@ -1,0 +1,140 @@
+:root{
+  --bg:#0e1a2b;--ink:#e4e7ec;--muted:#9ca6b4;
+  --h1:#5b7cfa;--h2:#30c9e8;--h3:#4158d0;
+  --hdr1:#33408e;--hdr2:#21305b;
+  --off:#ff7777;--night:#495670;
+  --seven:#4f9cf9;--two:#7c5dfa;
+  --green:#3ac79b;--amber:#f4b83d;--red:#ef4d4d;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:"Poppins",system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink);min-height:100vh;
+  background:radial-gradient(1000px 600px at 50% -200px,#152947 0%,transparent 70%),#0e1a2b;
+}
+
+.wrap{max-width:1200px;margin:40px auto;padding:0 18px}
+
+header{text-align:center;margin-bottom:26px}
+h1{
+  font-size:2rem;
+  font-weight:700;
+  color:var(--h1);
+  margin-bottom:8px;
+}
+.sub{
+  font-size:1rem;
+  color:var(--muted);
+  letter-spacing:0.3px;
+}
+
+.toolbar{display:flex;justify-content:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+button{
+  border:0;padding:10px 16px;border-radius:999px;font-weight:600;cursor:pointer;
+  color:#fff;background:linear-gradient(135deg,var(--h1),var(--h2));
+  box-shadow:0 4px 14px rgba(91,124,250,.45);filter:url(#btnGlow);
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 18px rgba(91,124,250,.6);
+}
+#dl{
+  background:#1c273a;color:var(--ink);border:1px solid #2d384d;filter:none;
+}
+#dl:hover{
+  background:#25344d;
+}
+
+.tabs{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tab{
+  position:relative;padding:8px 14px;border-radius:10px;background:#111c2b;
+  border:1px solid #1f2937;color:#cbd5e1;font-weight:700;cursor:pointer;
+  transition:all .3s ease;
+}
+.tab.active{
+  background:linear-gradient(135deg,#3c4bb5,#2e79c9);
+  color:#fff;box-shadow:0 4px 14px rgba(63,95,199,.4);border-color:transparent;
+}
+.tab::after{
+  content:"";position:absolute;left:10%;bottom:-3px;height:2px;width:0;
+  background:linear-gradient(90deg,var(--h1),var(--h2));transition:width .35s;
+}
+.tab.active::after{width:80%}
+
+.card{
+  background:rgba(20,29,47,.6);
+  backdrop-filter:blur(12px) saturate(160%);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;
+  padding:18px;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+  transition:transform .25s ease;
+}
+.card:hover{
+  transform:translateY(-2px);
+}
+.hidden{display:none}
+
+table{width:100%;border-collapse:separate;border-spacing:0;border-radius:14px;overflow:hidden}
+
+thead th{
+  font-size:.9rem;padding:10px 8px;text-align:center;color:#f1f5f9;
+  border-right:1px solid #263043;
+  letter-spacing:0.5px;
+}
+thead tr:first-child th{background:linear-gradient(90deg,var(--hdr1),var(--h1))}
+thead tr:nth-child(2) th{background:#253a65;color:#dbeafe}
+
+tbody th,tbody td{
+  font-size:.9rem;padding:9px 8px;border-right:1px solid #1f2937;border-bottom:1px solid #1f2937;
+  text-align:center;vertical-align:middle;
+  transition:background .25s ease;
+}
+tbody tr:nth-child(even){background:rgba(2,6,23,.35)}
+tbody tr:hover{background:rgba(255,255,255,.06)}
+tbody th{color:#cbd5e1;text-align:left;white-space:nowrap}
+
+.dept{font-weight:800;color:#93c5fd}
+
+.off{
+  background:rgba(252,165,165,.12);
+  color:#f87171;
+  font-weight:600;
+  border:1px dashed var(--off);
+  padding:4px 8px;
+  border-radius:8px;
+  display:inline-block;
+}
+
+.badge{
+  display:inline-block;padding:4px 7px;border-radius:8px;font-weight:700;color:#fff;
+  filter:brightness(1.1) saturate(1.1);
+  transition:transform .2s ease, filter .2s ease;
+}
+.badge:hover{
+  transform:scale(1.05);
+  filter:brightness(1.2);
+}
+.t-N{background:var(--night)}
+.t-7{background:var(--seven)}
+.t-2{background:var(--two)}
+.t-930,.t-9{background:var(--green)}
+.t-1030{background:var(--amber)}
+.t-730{background:#2db1e6}
+.t-800{background:#f68d3c}
+.t-1130{background:var(--red)}
+
+.week{
+  opacity:0;
+  transform:translateY(12px);
+  transition:opacity .35s ease, transform .35s ease;
+}
+.week:not(.hidden){
+  opacity:1;
+  transform:translateY(0);
+}
+
+footer{margin-top:22px;font-size:.75rem;color:var(--muted);text-align:center}
