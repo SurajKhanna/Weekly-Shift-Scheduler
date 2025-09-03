@@ -2,17 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Weekly Shift Scheduler</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
+  <title>Employee Shift Scheduler 🗓️</title>
+  <meta name="description" content="This will help plan the shift of the employees in a better way and save you a lot of time. P.S. You can also download the visible table as Excel using the above button.">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <div class="wrap">
     <header>
-      <h1>Weekly Shift Scheduler</h1>
-      <p class="sub">Auto-generated roster with all rule validation. Use the week tabs, regenerate, or download to Excel.</p>
+      <h1 id="pageTitle">Employee Shift Scheduler 🗓️</h1>
+      <p class="sub">
+        This will help plan the shift of the employees in a better way and save you a lot of time.  
+        <br>💡 P.S. You can also download the visible table as Excel using the above button.
+      </p>
     </header>
 
     <div class="toolbar">
@@ -23,7 +26,7 @@
     <nav id="tabs" class="tabs"></nav>
     <main id="weeks"></main>
 
-    <footer>Made with ❤️ by Shraddha Patil.</footer>
+    <footer>Made with ❤️ by Shraddha Patil</footer>
   </div>
 
   <!-- subtle glow for primary buttons -->

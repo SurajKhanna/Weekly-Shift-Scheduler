@@ -95,9 +95,73 @@ tbody th,tbody td{
 }
 tbody tr:nth-child(even){background:rgba(2,6,23,.35)}
 tbody tr:hover{background:rgba(255,255,255,.06)}
-tbody th{color:#cbd5e1;text-align:left;white-space:nowrap}
+/* Default row headers */
+tbody th {
+  color: #cbd5e1;
+  white-space: nowrap;
+  vertical-align: middle;
+}
 
-.dept{font-weight:800;color:#93c5fd}
+/* Employee names (second column only) */
+tbody tr th:not(.dept) {
+  text-align: center;
+}
+
+/* @keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+} */
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+button:disabled::before {
+  content: "🔄 ";
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+/* Pulse glow while loading */
+button.loading {
+  position: relative;
+  animation: pulseGlow 1s infinite;
+}
+
+@keyframes pulseGlow {
+  0%   { box-shadow: 0 0 6px rgba(91,124,250,.4); }
+  50%  { box-shadow: 0 0 18px rgba(91,124,250,.8); }
+  100% { box-shadow: 0 0 6px rgba(91,124,250,.4); }
+}
+
+/* Spin effect (for 🔄 regenerate) */
+button.loading .spinner-spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Bounce effect (for ⬇️ download) */
+button.loading .spinner-bounce {
+  display: inline-block;
+  animation: bounce 0.6s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+
+
+
+
+.dept{font-weight:800;color:#93c5fd;text-align:center;vertical-align:middle;}
 
 .off{
   background:rgba(252,165,165,.12);
@@ -139,9 +203,55 @@ tbody th{color:#cbd5e1;text-align:left;white-space:nowrap}
 
 footer{margin-top:22px;font-size:.75rem;color:var(--muted);text-align:center}
 
-/* ========== Mobile Friendly Enhancements ========== */
+/* ========== Responsive Section (Card Week) ========== */
+.card.week {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto 24px auto;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
 
-/* Make tables scrollable horizontally */
+/* Center align the header (Week X with date range) */
+.card.week > div {
+  text-align: center;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+/* Large monitors */
+@media (min-width: 1600px) {
+  .card.week {
+    max-width: 1800px;
+    padding: 28px;
+  }
+}
+
+/* Normal desktops */
+@media (min-width: 1024px) and (max-width: 1599px) {
+  .card.week {
+    max-width: 1400px;
+    padding: 22px;
+  }
+}
+
+/* Tablets */
+@media (min-width: 600px) and (max-width: 1023px) {
+  .card.week {
+    max-width: 95%;
+    padding: 18px;
+  }
+}
+
+/* Phones */
+@media (max-width: 599px) {
+  .card.week {
+    max-width: 100%;
+    padding: 14px;
+  }
+}
+
+/* ========== Mobile Friendly Enhancements ========== */
 .week table {
   display: block;
   overflow-x: auto;
@@ -155,66 +265,45 @@ footer{margin-top:22px;font-size:.75rem;color:var(--muted);text-align:center}
     padding: 0 10px;
   }
 
-  h1 {
-    font-size: 1.5rem;
-  }
+  h1 { font-size: 1.5rem; }
+  .sub { font-size: 0.9rem; }
 
-  .sub {
-    font-size: 0.9rem;
-  }
+  .toolbar { flex-direction: column; gap: 8px; }
+  .toolbar button { width: 100%; font-size: 0.95rem; }
 
-  .toolbar {
-    flex-direction: column;
-    gap: 8px;
-  }
+  .tabs { flex-wrap: wrap; gap: 6px; }
+  .tab { flex: 1 1 auto; text-align: center; font-size: 0.85rem; padding: 6px 10px; }
 
-  .toolbar button {
-    width: 100%;
-    font-size: 0.95rem;
-  }
-
-  .tabs {
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .tab {
-    flex: 1 1 auto;
-    text-align: center;
-    font-size: 0.85rem;
-    padding: 6px 10px;
-  }
-
-  table th,
-  table td {
-    font-size: 0.75rem;
-    padding: 6px 4px;
-  }
-
-  .badge, .off {
-    font-size: 0.85rem;
-    padding: 4px 6px;
-  }
+  table th, table td { font-size: 0.75rem; padding: 6px 4px; }
+  .badge, .off { font-size: 0.85rem; padding: 4px 6px; }
 }
 
-/* Phones and extra small devices */
+/* Phones */
 @media (max-width: 480px) {
-  h1 {
-    font-size: 1.3rem;
-  }
+  h1 { font-size: 1.3rem; }
+  .tab { font-size: 0.8rem; padding: 5px 8px; }
+  table th, table td { font-size: 0.7rem; padding: 5px 3px; }
+  .badge, .off { font-size: 0.75rem; }
+}
 
-  .tab {
-    font-size: 0.8rem;
-    padding: 5px 8px;
-  }
-
-  table th,
-  table td {
-    font-size: 0.7rem;
-    padding: 5px 3px;
-  }
-
-  .badge, .off {
-    font-size: 0.75rem;
-  }
+/* ========== Custom Scrollbar Styling ========== */
+.week table::-webkit-scrollbar {
+  height: 8px;
+}
+.week table::-webkit-scrollbar-track {
+  background: rgba(30, 38, 61, 0.8);
+  border-radius: 10px;
+}
+.week table::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--h1), var(--h2));
+  border-radius: 10px;
+  border: 2px solid rgba(30, 38, 61, 0.8);
+}
+.week table::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--h2), var(--h1));
+}
+/* Firefox */
+.week table {
+  scrollbar-width: thin;
+  scrollbar-color: var(--h1) rgba(30, 38, 61, 0.8);
 }

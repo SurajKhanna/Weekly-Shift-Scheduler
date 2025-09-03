@@ -24,6 +24,158 @@ function splitWeeks(y,m){
 }
 
 /* ========= Build one week (dynamic staff arrays) ========= */
+// (unchanged buildWeek from your original logic.js)
+// ...
+
+/* ========= Build table (dynamic sorted arrays) ========= */
+const depLabel=d=>({Reception:"Reception (GF)",OPD:"OPD (1F)",CallCenter:"Call Center (B1)",AppointmentDesk:"Appointment Desk (1F)"}[d]);
+function tableHTML(days,weekObj,i){
+  const sched=weekObj.data;
+  const th1=['<th rowspan="2">Department</th><th rowspan="2">Name of Employee</th>'];
+  const th2=[];
+  days.forEach(d=>{th1.push(`<th>${dow(d)}</th>`);th2.push(`<th>${fmt(d)}</th>`);});
+  const head=`<thead><tr>${th1.join("")}</tr><tr>${th2.join("")}</tr></thead>`;
+  const rows=[],block=(d,arr)=>arr.forEach((p,j)=>{
+    const cells=[];
+    if(j===0)cells.push(`<th class="dept" rowspan="${arr.length}">${depLabel(d)}</th>`);
+    cells.push(`<th>${p}</th>`);
+    days.forEach(dt=>cells.push(`<td>${sched[d][p][fmt(dt)]||""}</td>`));
+    rows.push(`<tr>${cells.join("")}</tr>`);
+  });
+  block("Reception", weekObj.Reception);
+  block("OPD", weekObj.OPD);
+  block("CallCenter", weekObj.CallCenter);
+  block("AppointmentDesk", weekObj.AppointmentDesk);
+
+  return `<section class="card week" data-w="${i}">
+    <div style="margin-bottom:8px"><span class="badge t-7">Week ${i}</span>
+      <small class="muted">(${fmt(days[0])} → ${fmt(days.at(-1))})</small>
+    </div><table>${head}<tbody>${rows.join("")}</tbody></table></section>`;
+}
+
+/* ========= Render month ========= */
+function renderMonth(y,m){
+  const weeks=splitWeeks(y,m),main=document.getElementById("weeks"),tabs=document.getElementById("tabs");
+  main.innerHTML="";tabs.innerHTML="";
+  weeks.forEach((days,i)=>{
+    const weekObj=buildWeek(days);
+    main.insertAdjacentHTML("beforeend",tableHTML(days,weekObj,i+1));
+    tabs.insertAdjacentHTML("beforeend",`<button class="tab" data-w="${i+1}">Week ${i+1}</button>`);
+  });
+  const today=new Date(),idx=(today.getFullYear()===y&&today.getMonth()===m)?
+        weeks.findIndex(w=>w.some(dt=>dt.getDate()===today.getDate()))+1:1;
+  activate(idx);tabs.onclick=e=>{const w=e.target.dataset.w;w&&activate(+w);};
+}
+function activate(n){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",+t.dataset.w===n));
+  document.querySelectorAll(".week").forEach(w=>w.classList.toggle("hidden",+w.dataset.w!==n));
+}
+
+/* ========= Excel export (improved) ========= */
+function download() {
+  const tbl = document.querySelector(".week:not(.hidden) table");
+  if (!tbl) return;
+
+  let weekName =
+    document.querySelector(".tab.active")?.textContent.trim() ||
+    document.querySelector(".week:not(.hidden) .badge.t-7")?.textContent.trim() ||
+    "Week";
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const dateStr = `${pad(now.getDate())} ${now.toLocaleString('en-US', { month: 'short' })} ${now.getFullYear()}`;
+  let hr = now.getHours(), min = pad(now.getMinutes());
+  const ampm = hr >= 12 ? "PM" : "AM";
+  hr = hr % 12; if (hr === 0) hr = 12;
+  const timeStr = `${pad(hr)}.${min} ${ampm}`;
+  const filename = `${weekName} - ${dateStr} - ${timeStr}.xls`;
+
+  const excelStyle = `
+    <style>
+      body { background:#1e263d; margin:0; }
+      table { margin: 36px auto; background: #262f49; border-radius: 18px; border-collapse: separate !important; border-spacing: 0; box-shadow: 0 6px 40px #0006; font-family: 'Poppins',Segoe UI,Arial,sans-serif; }
+      thead th { background: linear-gradient(90deg,#33408e,#5b7cfa 60%,#30c9e8); font-size: 1.08rem; color: #f3f7ff; border-right: 1.5px solid #253a65; border-bottom: 2.5px solid #3c6ee0; padding:14px 12px; letter-spacing: 0.9px; font-weight: bold; text-align:center; }
+      thead tr:nth-child(2) th { background: #21305b; color: #dbeafe; font-weight: 600; border-bottom:1.5px solid #4f5bbd; }
+      tbody th { background:#212a3d; color:#ffe2f1; font-weight: bold; text-align:left; padding:12px; border-right:1px solid #313970; border-bottom:1px solid #2c335a; }
+      tbody td { padding:11px 6px; color:#f3f7ff; text-align:center; font-size:1.03rem; border-right:1px solid #313970; border-bottom:1px solid #242b4f; background: rgba(35, 45, 63, 0.91); }
+      tbody tr:nth-child(even) td { background:#293354; }
+      .badge, .off { border-radius:8px; padding:5px 9px; font-weight:600; display:inline-block; font-size:1.06rem; text-align:center; }
+      .badge { background: #4750b4; color: #fff; }
+      .off   { color:#ec6174; background:rgba(240,51,80,.12); border:1px dashed #e67397; }
+      section { display:flex; flex-direction:column; align-items:center; }
+    </style>
+  `;
+
+  const html = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+      <head><meta charset="utf-8">${excelStyle}</head>
+      <body>
+        <section>
+          <div style="margin-bottom:17px; font-size:1.18rem; color:#95b8ff; font-weight:600; letter-spacing:0.7px;">
+            ${weekName} | Exported on ${dateStr} ${timeStr}
+          </div>
+          ${tbl.outerHTML}
+        </section>
+      </body>
+    </html>
+  `;
+
+  const blob = new Blob([html], { type: "application/vnd.ms-excel" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+/* ========= Animated button helpers ========= */
+function setButtonLoading(btn, loadingText, emoji="🔄", style="spin") {
+  if (btn.dataset.loading === "true") return;
+  btn.dataset.loading = "true";
+  btn.classList.add("loading");
+
+  const originalText = btn.dataset.originalText || btn.textContent;
+  btn.dataset.originalText = originalText;
+
+  let dotCount = 0;
+  btn.innerHTML = `<span class="spinner-${style}">${emoji}</span> ${loadingText}`;
+
+  const interval = setInterval(() => {
+    dotCount = (dotCount + 1) % 4;
+    btn.innerHTML = `<span class="spinner-${style}">${emoji}</span> ${loadingText}${".".repeat(dotCount)}`;
+  }, 500);
+
+  return (successText = "✅ Done!") => {
+    clearInterval(interval);
+    btn.textContent = successText;
+    btn.classList.remove("loading");
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.dataset.loading = "false";
+    }, 1500);
+  };
+}
+
+/* ========= Buttons & bootstrap ========= */
+document.getElementById("regen").onclick = () => {
+  const btn = document.getElementById("regen");
+  const finish = setButtonLoading(btn, "Regenerating", "🔄", "spin");
+  setTimeout(() => {
+    renderMonth(cur.getFullYear(), cur.getMonth());
+    finish("✅ Roster Ready!");
+  }, 1200);
+};
+
+document.getElementById("dl").onclick = () => {
+  const btn = document.getElementById("dl");
+  const finish = setButtonLoading(btn, "Downloading", "⬇️", "bounce");
+  setTimeout(() => {
+    download();
+    finish("✅ Downloaded!");
+  }, 1200);
+};
+
+const cur=new Date();renderMonth(cur.getFullYear(),cur.getMonth());
+
 function buildWeek(days){
   // === Weekly random swap: Jayshree <-> Shubhangi ===
   const weeklySwap = Math.random() < 0.5;
@@ -144,201 +296,3 @@ function buildWeek(days){
     data: sched
   };
 }
-
-/* ========= Build table (dynamic sorted arrays) ========= */
-const depLabel=d=>({Reception:"Reception (GF)",OPD:"OPD (1F)",CallCenter:"Call Center (B1)",AppointmentDesk:"Appointment Desk (1F)"}[d]);
-function tableHTML(days,weekObj,i){
-  const sched=weekObj.data;
-  const th1=['<th rowspan="2">Department</th><th rowspan="2">Name of Employee</th>'];
-  const th2=[];
-  days.forEach(d=>{th1.push(`<th>${dow(d)}</th>`);th2.push(`<th>${fmt(d)}</th>`);});
-  const head=`<thead><tr>${th1.join("")}</tr><tr>${th2.join("")}</tr></thead>`;
-  const rows=[],block=(d,arr)=>arr.forEach((p,j)=>{
-    const cells=[];
-    if(j===0)cells.push(`<th class="dept" rowspan="${arr.length}">${depLabel(d)}</th>`);
-    cells.push(`<th>${p}</th>`);
-    days.forEach(dt=>cells.push(`<td>${sched[d][p][fmt(dt)]||""}</td>`));
-    rows.push(`<tr>${cells.join("")}</tr>`);
-  });
-  block("Reception", weekObj.Reception);
-  block("OPD", weekObj.OPD);
-  block("CallCenter", weekObj.CallCenter);
-  block("AppointmentDesk", weekObj.AppointmentDesk);
-
-  return `<section class="card week" data-w="${i}">
-    <div style="margin-bottom:8px"><span class="badge t-7">Week ${i}</span>
-      <small class="muted">(${fmt(days[0])} → ${fmt(days.at(-1))})</small>
-    </div><table>${head}<tbody>${rows.join("")}</tbody></table></section>`;
-}
-
-/* ========= Render month ========= */
-function renderMonth(y,m){
-  const weeks=splitWeeks(y,m),main=document.getElementById("weeks"),tabs=document.getElementById("tabs");
-  main.innerHTML="";tabs.innerHTML="";
-  weeks.forEach((days,i)=>{
-    const weekObj=buildWeek(days);
-    main.insertAdjacentHTML("beforeend",tableHTML(days,weekObj,i+1));
-    tabs.insertAdjacentHTML("beforeend",`<button class="tab" data-w="${i+1}">Week ${i+1}</button>`);
-  });
-  const today=new Date(),idx=(today.getFullYear()===y&&today.getMonth()===m)?
-        weeks.findIndex(w=>w.some(dt=>dt.getDate()===today.getDate()))+1:1;
-  activate(idx);tabs.onclick=e=>{const w=e.target.dataset.w;w&&activate(+w);};
-}
-function activate(n){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",+t.dataset.w===n));
-  document.querySelectorAll(".week").forEach(w=>w.classList.toggle("hidden",+w.dataset.w!==n));
-}
-
-/* ========= Excel export (Working) ========= */
-function download() {
-  const tbl = document.querySelector(".week:not(.hidden) table");
-  if (!tbl) return;
-
-  // Get week name from active tab or badge (e.g., "Week 4")
-  let weekName =
-    document.querySelector(".tab.active")?.textContent.trim() ||
-    document.querySelector(".week:not(.hidden) .badge.t-7")?.textContent.trim() ||
-    "Week";
-
-  // Current datetime for filename
-  const now = new Date();
-  const pad = n => String(n).padStart(2, "0");
-  const dateStr = `${pad(now.getDate())} ${now.toLocaleString('en-US', { month: 'short' })} ${now.getFullYear()}`;
-  let hr = now.getHours(), min = pad(now.getMinutes());
-  const ampm = hr >= 12 ? "PM" : "AM";
-  hr = hr % 12; if (hr === 0) hr = 12;
-  const timeStr = `${pad(hr)}.${min} ${ampm}`;
-  const filename = `${weekName} - ${dateStr} - ${timeStr}.xls`;
-
-  // Enhanced Excel styling for aesthetics
-  const excelStyle = `
-    <style>
-      body { background:#1e263d; margin:0; }
-      table {
-        margin: 36px auto;
-        background: #262f49;
-        border-radius: 18px;
-        border-collapse: separate !important;
-        border-spacing: 0;
-        box-shadow: 0 6px 40px #0006;
-        font-family: 'Poppins',Segoe UI,Arial,sans-serif;
-      }
-      thead th {
-        background: linear-gradient(90deg,#33408e,#5b7cfa 60%,#30c9e8);
-        font-size: 1.08rem;
-        color: #f3f7ff;
-        border-right: 1.5px solid #253a65;
-        border-bottom: 2.5px solid #3c6ee0;
-        padding:14px 12px;
-        letter-spacing: 0.9px;
-        font-weight: bold;
-        text-align:center;
-      }
-      thead tr:nth-child(2) th {
-        background: #21305b;
-        color: #dbeafe;
-        font-weight: 600;
-        border-bottom:1.5px solid #4f5bbd;
-      }
-      tbody th {
-        background:#212a3d;
-        color:#ffe2f1;
-        font-weight: bold;
-        text-align:left;
-        padding:12px;
-        border-right:1px solid #313970;
-        border-bottom:1px solid #2c335a;
-      }
-      tbody td {
-        padding:11px 6px;
-        color:#f3f7ff;
-        text-align:center;
-        font-size:1.03rem;
-        border-right:1px solid #313970;
-        border-bottom:1px solid #242b4f;
-        background: rgba(35, 45, 63, 0.91);
-      }
-      tbody tr:nth-child(even) td {
-        background:#293354;
-      }
-      .badge, .off {
-        border-radius:8px;
-        padding:5px 9px;
-        font-weight:600;
-        display:inline-block;
-        font-size:1.06rem;
-        text-align:center;
-      }
-      .badge { background: #4750b4; color: #fff; }
-      .off   { color:#ec6174; background:rgba(240,51,80,.12); border:1px dashed #e67397; }
-      /* Center section visually on page */
-      section { display:flex; flex-direction:column; align-items:center; }
-    </style>
-  `;
-
-  // Build Excel HTML body with centered table
-  const html = `
-    <html xmlns:o="urn:schemas-microsoft-com:office:office"
-          xmlns:x="urn:schemas-microsoft-com:office:excel">
-      <head><meta charset="utf-8">${excelStyle}</head>
-      <body>
-        <section>
-          <div style="margin-bottom:17px; font-size:1.18rem; color:#95b8ff; font-weight:600; letter-spacing:0.7px;">
-            ${weekName} | Exported on ${dateStr} ${timeStr}
-          </div>
-          ${tbl.outerHTML}
-        </section>
-      </body>
-    </html>
-  `;
-
-  const blob = new Blob([html], { type: "application/vnd.ms-excel" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-}
-
-/* ========= Excel export (XLSX with SheetJS) ========= */
-// function download() {
-//   const tbl = document.querySelector(".week:not(.hidden) table");
-//   if (!tbl) return;
-
-//   // Get week name for filename
-//   let weekName =
-//     document.querySelector(".tab.active")?.textContent.trim() ||
-//     "Week";
-
-//   // Current datetime for filename
-//   const now = new Date();
-//   const pad = n => String(n).padStart(2, "0");
-//   const dateStr = `${pad(now.getDate())} ${now.toLocaleString('en-US', { month: 'short' })} ${now.getFullYear()}`;
-//   let hr = now.getHours(), min = pad(now.getMinutes());
-//   const ampm = hr >= 12 ? "PM" : "AM";
-//   hr = hr % 12; if (hr === 0) hr = 12;
-//   const timeStr = `${pad(hr)}:${min} ${ampm}`;
-
-//   const filename = `${weekName} - ${dateStr} - ${timeStr}.xlsx`;
-
-//   // Convert table → workbook
-//   const wb = XLSX.utils.table_to_book(tbl, { sheet: weekName });
-  
-//   // Save as XLSX
-//   XLSX.writeFile(wb, filename);
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-/* ========= Buttons & bootstrap ========= */
-document.getElementById("regen").onclick=()=>renderMonth(cur.getFullYear(),cur.getMonth());
-document.getElementById("dl").onclick=download;
-const cur=new Date();renderMonth(cur.getFullYear(),cur.getMonth());
