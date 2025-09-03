@@ -304,8 +304,8 @@ function buildWeek(days){
   let opdStaff          = [...Departments.OPD].filter(e => e !== "Shubhangi" && e !== "Anagha").sort();
   let callCenterStaff   = [...Departments.CallCenter].filter(e => e !== "Jayshree").sort();
   if (weeklySwap) {
-    opdStaff.push("Jayshree");   // swap into OPD
-    callCenterStaff.push("Shubhangi"); // swap into CC
+    opdStaff.push("Jayshree");   
+    callCenterStaff.push("Shubhangi"); 
   } else {
     opdStaff.push("Shubhangi");
     callCenterStaff.push("Jayshree");
@@ -322,19 +322,30 @@ function buildWeek(days){
     arr.forEach(p=>sched[dep][p]={});
   });
 
-  // === Weekly off assignment ===
-  const allDays = [...days];
-  const offs = {};
-  [receptionStaff,[...opdStaff,"Anagha"],callCenterStaff,appointmentDeskStaff].forEach(arr=>{
-    arr.forEach(e=>{
-      offs[e] = pick(allDays);  // one random off day
+  // === Helper for unique offs per department ===
+  function assignUniqueOffs(staff, days) {
+    let offs = {};
+    let available = [...days];
+    staff.forEach(e=>{
+      if (available.length === 0) available = [...days]; // recycle if staff > days
+      let day = pick(available);
+      offs[e] = day;
+      available = available.filter(d => !same(d, day));
     });
-  });
+    return offs;
+  }
+
+  const offs = {
+    Reception: assignUniqueOffs(receptionStaff, allDays= [...days]),
+    OPD: assignUniqueOffs([...opdStaff,"Anagha"], [...days]),
+    CallCenter: assignUniqueOffs(callCenterStaff, [...days]),
+    AppointmentDesk: assignUniqueOffs(appointmentDeskStaff, [...days])
+  };
 
   // === Pre-plan Shraddha P’s week (Call Center) ===
   const shraddhaPSchedule = {};
-  let ccDays = days.filter(d => d.getDay() !== 0); // Mon–Sat
-  let tenThirtyDay = pick(ccDays); // exactly one day at 10:30
+  let ccDays = days.filter(d => d.getDay() !== 0); 
+  let tenThirtyDay = pick(ccDays); 
   let count730 = 0, count800 = 0;
   ccDays.forEach(d => {
     if (same(d,tenThirtyDay)) {
@@ -351,18 +362,16 @@ function buildWeek(days){
     }
   });
 
-  // === Pre-plan Appointment Desk rotation ===
+  // === Pre-plan Appointment Desk alternating schedule ===
   const adSchedule = { Vanita:{}, Gaurav:{} };
   let adDays = days.filter(d => d.getDay() !== 0);
-  let vanitaCount = { "9:30":0, "2":0 };
+  let flip = true; 
   adDays.forEach(d=>{
-    let slot;
-    if (vanitaCount["9:30"] >= 3) slot = "2";
-    else if (vanitaCount["2"] >= 3) slot = "9:30";
-    else slot = Math.random()<0.5 ? "9:30" : "2";
-    adSchedule["Vanita"][fmt(d)] = slot;
-    adSchedule["Gaurav"][fmt(d)] = slot==="9:30" ? "2" : "9:30";
-    vanitaCount[slot]++;
+    const slotVanita = flip ? "9:30" : "2";
+    const slotGaurav = flip ? "2" : "9:30";
+    adSchedule["Vanita"][fmt(d)] = slotVanita;
+    adSchedule["Gaurav"][fmt(d)] = slotGaurav;
+    flip = !flip;
   });
 
   // === Helpers ===
@@ -382,34 +391,31 @@ function buildWeek(days){
   };
 
   // === Fill schedule day by day ===
-  days.forEach(d=>{
+  days.forEach((d,di)=>{
     // ---------- Reception ----------
-    const recSlots = shuffle(["7","2"]);
     receptionStaff.forEach(e=>{
-      if (same(d,offs[e])) {
+      if (same(d,offs.Reception[e])) {
         put("Reception",e,d,OFF);
-      } else {
-        if (e==="Karan") {
-          put("Reception",e,d,badge("t-N","N"));
-        } else {
-          const slot = recSlots.pop();
-          put("Reception",e,d,badge(slotClass[slot],slot));
-        }
+      } else if (e==="Karan") {
+        put("Reception",e,d,badge("t-N","N"));
+      } else if (e==="Sagar") {
+        put("Reception",e,d,badge(slotClass[di%2===0?"7":"2"], di%2===0?"7":"2"));
+      } else if (e==="Roshan") {
+        put("Reception",e,d,badge(slotClass[di%2===0?"2":"7"], di%2===0?"2":"7"));
       }
     });
 
     // ---------- OPD ----------
-    let opdSlots = shuffle(["9:30","10:30"]);
-    opdStaff.forEach(e=>{
-      if (same(d,offs[e])) {
+    let opdCycle = ["9:30","10:30"];
+    opdStaff.forEach((e,ei)=>{
+      if (same(d,offs.OPD[e])) {
         put("OPD",e,d,OFF);
       } else {
-        const slot = opdSlots.pop() || "9:30";
+        const slot = opdCycle[(ei+di)%2]; 
         put("OPD",e,d,badge(slotClass[slot],slot));
       }
     });
-    // Anagha fixed at 9:00
-    if (same(d,offs["Anagha"])) {
+    if (same(d,offs.OPD["Anagha"])) {
       put("OPD","Anagha",d,OFF);
     } else {
       put("OPD","Anagha",d,badge("t-9","9:00"));
@@ -418,32 +424,35 @@ function buildWeek(days){
     // ---------- Call Center ----------
     let ccAlt = (weeklySwap ? "Shubhangi" : "Jayshree");
     callCenterStaff.forEach(e=>{
-      if (same(d,offs[e])) {
+      if (same(d,offs.CallCenter[e])) {
         put("CallCenter",e,d,OFF);
-      } else {
-        if (e==="Prasad") {
-          put("CallCenter",e,d,badge("t-1130","11:30"));
-        } else if (e==="Shraddha P") {
-          let slot = shraddhaPSchedule[fmt(d)];
-          put("CallCenter",e,d,badge(slotClass[slot],slot));
-        } else if (e===ccAlt) {
-          let shrSlot = shraddhaPSchedule[fmt(d)];
-          if (shrSlot==="7:30") put("CallCenter",e,d,badge("t-800","8:00"));
-          else if (shrSlot==="8:00") put("CallCenter",e,d,badge("t-730","7:30"));
-          else {
-            let altSlot = Math.random()<0.5 ? "7:30" : "8:00";
-            put("CallCenter",e,d,badge(slotClass[altSlot],altSlot));
-          }
+      } else if (e==="Prasad") {
+        put("CallCenter",e,d,badge("t-1130","11:30"));
+      } else if (e==="Shraddha P") {
+        let slot = shraddhaPSchedule[fmt(d)] || "7:30";
+        put("CallCenter",e,d,badge(slotClass[slot],slot));
+      } else if (e===ccAlt) {
+        let shrSlot = shraddhaPSchedule[fmt(d)];
+        if (!shrSlot) {
+          let altSlot = pick(["7:30","8:00"]);
+          put("CallCenter",e,d,badge(slotClass[altSlot],altSlot));
+        } else if (shrSlot==="7:30") {
+          put("CallCenter",e,d,badge("t-800","8:00"));
+        } else if (shrSlot==="8:00") {
+          put("CallCenter",e,d,badge("t-730","7:30"));
+        } else if (shrSlot==="10:30") {
+          let altSlot = pick(["7:30","8:00"]);
+          put("CallCenter",e,d,badge(slotClass[altSlot],altSlot));
         }
       }
     });
 
     // ---------- Appointment Desk ----------
     appointmentDeskStaff.forEach(e=>{
-      if (same(d,offs[e])) {
+      if (same(d,offs.AppointmentDesk[e])) {
         put("AppointmentDesk",e,d,OFF);
       } else {
-        const slot = adSchedule[e][fmt(d)];
+        const slot = adSchedule[e][fmt(d)] || "9:30";
         put("AppointmentDesk",e,d,badge(slotClass[slot],slot));
       }
     });
@@ -457,6 +466,8 @@ function buildWeek(days){
     data: sched
   };
 }
+
+
 
 
 
