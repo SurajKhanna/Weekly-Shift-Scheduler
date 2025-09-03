@@ -185,7 +185,8 @@ button.loading .spinner-bounce {
 .t-N{background:var(--night)}
 .t-7{background:var(--seven)}
 .t-2{background:var(--two)}
-.t-930,.t-9{background:var(--green)}
+.t-9 { background: var(--green); }     /* Keep existing green */
+.t-930 { background: lightskyblue; }        /* Lighter/different green */
 .t-1030{background:var(--amber)}
 .t-730{background:#2db1e6}
 .t-800{background:#f68d3c}
