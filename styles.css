@@ -138,3 +138,83 @@ tbody th{color:#cbd5e1;text-align:left;white-space:nowrap}
 }
 
 footer{margin-top:22px;font-size:.75rem;color:var(--muted);text-align:center}
+
+/* ========== Mobile Friendly Enhancements ========== */
+
+/* Make tables scrollable horizontally */
+.week table {
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+/* Tablets and smaller screens */
+@media (max-width: 768px) {
+  .wrap {
+    margin: 20px auto;
+    padding: 0 10px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .sub {
+    font-size: 0.9rem;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toolbar button {
+    width: 100%;
+    font-size: 0.95rem;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tab {
+    flex: 1 1 auto;
+    text-align: center;
+    font-size: 0.85rem;
+    padding: 6px 10px;
+  }
+
+  table th,
+  table td {
+    font-size: 0.75rem;
+    padding: 6px 4px;
+  }
+
+  .badge, .off {
+    font-size: 0.85rem;
+    padding: 4px 6px;
+  }
+}
+
+/* Phones and extra small devices */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.3rem;
+  }
+
+  .tab {
+    font-size: 0.8rem;
+    padding: 5px 8px;
+  }
+
+  table th,
+  table td {
+    font-size: 0.7rem;
+    padding: 5px 3px;
+  }
+
+  .badge, .off {
+    font-size: 0.75rem;
+  }
+}
