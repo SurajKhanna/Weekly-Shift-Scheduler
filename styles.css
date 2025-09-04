@@ -1,60 +1,67 @@
-:root{
-  --bg:#0e1a2b;--ink:#e4e7ec;--muted:#9ca6b4;
-  --h1:#5b7cfa;--h2:#30c9e8;--h3:#4158d0;
-  --hdr1:#33408e;--hdr2:#21305b;
-  --off:#ff7777;--night:#495670;
-  --seven:#4f9cf9;--two:#7c5dfa;
-  --green:#3ac79b;--amber:#f4b83d;--red:#ef4d4d;
+/* ========== Root variables - sabse important colors yahan define kiye hain ========== */
+:root {
+  --bg: #0e1a2b; /* Main background color */
+  --ink: #e4e7ec; /* Text ke liye main color */
+  --muted: #9ca6b4; /* Light text ke liye muted color */
+  --h1: #5b7cfa; /* Primary heading ka color */
+  --h2: #30c9e8; /* Secondary heading color */
+  --h3: #4158d0;
+  --hdr1: #33408e;
+  --hdr2: #21305b;
+  --off: #ff7777; /* OFF days ke liye red color */
+  --night: #495670;
+  --seven: #4f9cf9;
+  --two: #7c5dfa;
+  --green: #3ac79b;
+  --amber: #f4b83d;
+  --red: #ef4d4d;
 }
 
-/* ========== Global Scrollbar Styling (Desktop) ========== */
+/* ========== Scrollbar ko beautiful banane ke liye styling (Desktop) ========== */
 html, body {
-  scrollbar-width: thin;  /* Firefox */
-  scrollbar-color: transparent transparent;
+  scrollbar-width: thin; /* Firefox mein thin scrollbar */
+  scrollbar-color: transparent transparent; /* Initially transparent */
 }
 
-/* Chrome, Edge, Safari */
+/* Chrome, Edge, Safari ke liye custom scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;   /* vertical */
-  height: 10px;  /* horizontal */
+  width: 10px; /* Vertical scrollbar ki width */
+  height: 10px; /* Horizontal scrollbar ki height */
   background: transparent;
 }
 
-/* Track */
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: transparent; /* Track background clear rakhi hai */
 }
 
-/* Thumb hidden by default */
+/* Scrollbar thumb ko initially hide kiya, hover pe dikhega */
 ::-webkit-scrollbar-thumb {
   background: transparent;
-  border-radius: 10px;
+  border-radius: 10px; /* Rounded corners for smooth look */
   border: 2px solid transparent;
   transition: background 0.3s ease, border 0.3s ease;
 }
 
-/* Show thumb on hover (page) */
+/* Hover karne pe scrollbar visible ho jayega with gradient effect */
 html:hover ::-webkit-scrollbar-thumb,
 body:hover ::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, var(--h1), var(--h2));
   border: 2px solid rgba(30, 38, 61, 0.8);
 }
 
-/* Hover highlight */
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, var(--h2), var(--h1));
 }
 
-/* ========== Table-specific Scrollbar Styling ========== */
+/* ========== Table ke liye special scrollbar ========== */
 .table-wrap {
-  overflow-x: auto;
-  scrollbar-width: thin;              /* Firefox */
+  overflow-x: auto; /* Horizontal scroll enable */
+  scrollbar-width: thin;
   scrollbar-color: transparent transparent;
 }
 
-/* Chrome/Edge/Safari table scrollbar */
 .table-wrap::-webkit-scrollbar {
-  height: 8px;                        /* horizontal scrollbar height */
+  height: 8px; /* Table scrollbar thoda chhota */
   background: transparent;
 }
 
@@ -69,7 +76,7 @@ body:hover ::-webkit-scrollbar-thumb {
   transition: background 0.3s ease, border 0.3s ease;
 }
 
-/* Show only when hovering over the table */
+/* Table hover pe hi scrollbar dikhega */
 .table-wrap:hover::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, var(--h1), var(--h2));
   border: 2px solid rgba(30, 38, 61, 0.8);
@@ -79,77 +86,145 @@ body:hover ::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, var(--h2), var(--h1));
 }
 
-*{box-sizing:border-box;margin:0;padding:0}
-
-body{
-  font-family:"Poppins",system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-  color:var(--ink);min-height:100vh;
-  background:radial-gradient(1000px 600px at 50% -200px,#152947 0%,transparent 70%),#0e1a2b;
+/* ========== Basic styling starts here ========== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.wrap{max-width:1200px;margin:40px auto;padding:0 18px}
+body {
+  font-family: "Poppins", system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  color: var(--ink);
+  min-height: 100vh;
+  background: radial-gradient(1000px 600px at 50% -200px, #152947 0%, transparent 70%), #0e1a2b;
+}
 
-header{text-align:center;margin-bottom:26px}
+.wrap {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 18px;
+}
+
+/* ========== Header styling - title aur subtitle ke liye ========== */
+header {
+  text-align: center;
+  margin-bottom: 26px;
+}
+
 h1 {
   font-size: 2.2rem;
   font-weight: 800;
   background: linear-gradient(90deg, var(--h1), var(--h2));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 2px 8px rgba(91,124,250,0.4);
-}
-.sub{
-  font-size:1rem;
-  color:var(--muted);
-  letter-spacing:0.3px;
+  text-shadow: 0 2px 8px rgba(91, 124, 250, 0.4);
 }
 
-.toolbar{display:flex;justify-content:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-button{
-  border:0;padding:10px 16px;border-radius:999px;font-weight:600;cursor:pointer;
-  color:#fff;background:linear-gradient(135deg,var(--h1),var(--h2));
-  box-shadow:0 4px 14px rgba(91,124,250,.45);filter:url(#btnGlow);
-  transition:transform .2s ease, box-shadow .2s ease;
-}
-button:hover{
-  transform:translateY(-2px);
-  box-shadow:0 6px 18px rgba(91,124,250,.6);
-}
-#dl{
-  background:#1c273a;color:var(--ink);border:1px solid #2d384d;filter:none;
-}
-#dl:hover{
-  background:#25344d;
+.sub {
+  font-size: 1rem;
+  color: var(--muted);
+  letter-spacing: 0.3px;
 }
 
-.tabs{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.tab{
-  position:relative;padding:8px 14px;border-radius:10px;background:#111c2b;
-  border:1px solid #1f2937;color:#cbd5e1;font-weight:700;cursor:pointer;
-  transition:all .3s ease;
+/* ========== Button styling - sabhi buttons ke liye common style ========== */
+.toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
 }
-.tab.active{
-  background:linear-gradient(135deg,#3c4bb5,#2e79c9);
-  color:#fff;box-shadow:0 4px 14px rgba(63,95,199,.4);border-color:transparent;
-}
-.tab::after{
-  content:"";position:absolute;left:10%;bottom:-3px;height:2px;width:0;
-  background:linear-gradient(90deg,var(--h1),var(--h2));transition:width .35s;
-}
-.tab.active::after{width:80%}
 
-.card{
-  background:rgba(20,29,47,.6);
-  backdrop-filter:blur(12px) saturate(160%);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:16px;
-  padding:18px;
-  box-shadow:0 8px 24px rgba(0,0,0,.35);
-  transition:transform .25s ease;
+button {
+  border: 0;
+  padding: 10px 16px;
+  border-radius: 999px; /* Fully rounded buttons */
+  font-weight: 600;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(135deg, var(--h1), var(--h2));
+  box-shadow: 0 4px 14px rgba(91, 124, 250, .45);
+  filter: url(#btnGlow);
+  transition: transform .2s ease, box-shadow .2s ease;
 }
-.card:hover{
-  transform:translateY(-2px);
+
+button:hover {
+  transform: translateY(-2px); /* Slight upward movement on hover */
+  box-shadow: 0 6px 18px rgba(91, 124, 250, .6);
 }
+
+/* Download button ko alag styling */
+#dl {
+  background: #1c273a;
+  color: var(--ink);
+  border: 1px solid #2d384d;
+  filter: none;
+}
+
+#dl:hover {
+  background: #25344d;
+}
+
+/* ========== Tab styling ========== */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.tab {
+  position: relative;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: #111c2b;
+  border: 1px solid #1f2937;
+  color: #cbd5e1;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .3s ease;
+}
+
+.tab.active {
+  background: linear-gradient(135deg, #3c4bb5, #2e79c9);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(63, 95, 199, .4);
+  border-color: transparent;
+}
+
+/* Active tab ke neeche underline effect */
+.tab::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  bottom: -3px;
+  height: 2px;
+  width: 0;
+  background: linear-gradient(90deg, var(--h1), var(--h2));
+  transition: width .35s;
+}
+
+.tab.active::after {
+  width: 80%;
+}
+
+/* ========== Card aur table styling ========== */
+.card {
+  background: rgba(20, 29, 47, .6);
+  backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  transition: transform .25s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
 .tab {
   border-radius: 999px;
   padding: 8px 18px;
@@ -157,30 +232,61 @@ button:hover{
 }
 
 .tab:hover {
-  background: rgba(91,124,250,0.25);
+  background: rgba(91, 124, 250, 0.25);
   transform: translateY(-2px);
 }
 
-
-.hidden{display:none}
-
-table{width:100%;border-collapse:separate;border-spacing:0;border-radius:14px;overflow:hidden}
-
-thead th{
-  font-size:.9rem;padding:10px 8px;text-align:center;color:#f1f5f9;
-  border-right:1px solid #263043;
-  letter-spacing:0.5px;
+.hidden {
+  display: none;
 }
-thead tr:first-child th{background:linear-gradient(90deg,var(--hdr1),var(--h1))}
-thead tr:nth-child(2) th{background:#253a65;color:#dbeafe}
 
-tbody th,tbody td{
-  font-size:.9rem;padding:9px 8px;border-right:1px solid #1f2937;border-bottom:1px solid #1f2937;
-  text-align:center;vertical-align:middle;
-  transition:background .25s ease;
+/* ========== Table styling - schedule display ke liye ========== */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 14px;
+  overflow: hidden;
 }
-tbody tr:nth-child(even){background:rgba(2,6,23,.35)}
-tbody tr:hover{background:rgba(255,255,255,.06)}
+
+thead th {
+  font-size: .9rem;
+  padding: 10px 8px;
+  text-align: center;
+  color: #f1f5f9;
+  border-right: 1px solid #263043;
+  letter-spacing: 0.5px;
+}
+
+/* Header rows ke liye different colors */
+thead tr:first-child th {
+  background: linear-gradient(90deg, var(--hdr1), var(--h1));
+}
+
+thead tr:nth-child(2) th {
+  background: #253a65;
+  color: #dbeafe;
+}
+
+tbody th, tbody td {
+  font-size: .9rem;
+  padding: 9px 8px;
+  border-right: 1px solid #1f2937;
+  border-bottom: 1px solid #1f2937;
+  text-align: center;
+  vertical-align: middle;
+  transition: background .25s ease;
+}
+
+/* Alternate row colors for better readability */
+tbody tr:nth-child(even) {
+  background: rgba(2, 6, 23, .35);
+}
+
+tbody tr:hover {
+  background: rgba(255, 255, 255, .06);
+}
+
 /* Default row headers */
 tbody th {
   color: #cbd5e1;
@@ -193,11 +299,7 @@ tbody tr th:not(.dept) {
   text-align: center;
 }
 
-/* @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-} */
-
+/* Button loading states */
 button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
@@ -216,9 +318,15 @@ button.loading {
 }
 
 @keyframes pulseGlow {
-  0%   { box-shadow: 0 0 6px rgba(91,124,250,.4); }
-  50%  { box-shadow: 0 0 18px rgba(91,124,250,.8); }
-  100% { box-shadow: 0 0 6px rgba(91,124,250,.4); }
+  0% {
+    box-shadow: 0 0 6px rgba(91, 124, 250, .4);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(91, 124, 250, .8);
+  }
+  100% {
+    box-shadow: 0 0 6px rgba(91, 124, 250, .4);
+  }
 }
 
 /* Spin effect (for 🔄 regenerate) */
@@ -228,8 +336,12 @@ button.loading .spinner-spin {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Bounce effect (for ⬇️ download) */
@@ -239,56 +351,102 @@ button.loading .spinner-bounce {
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-4px); }
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
 }
 
-
-
-
-
-.dept{font-weight:800;color:#93c5fd;text-align:center;vertical-align:middle;}
-
-.off{
-  background:rgba(252,165,165,.12);
-  color:#f87171;
-  font-weight:600;
-  border:1px dashed var(--off);
-  padding:4px 8px;
-  border-radius:8px;
-  display:inline-block;
+.dept {
+  font-weight: 800;
+  color: #93c5fd;
+  text-align: center;
+  vertical-align: middle;
 }
 
-.badge{
-  display:inline-block;padding:4px 7px;border-radius:8px;font-weight:700;color:#fff;
-  filter:brightness(1.1) saturate(1.1);
-  transition:transform .2s ease, filter .2s ease;
-}
-.badge:hover{
-  transform:scale(1.05);
-  filter:brightness(1.2);
-}
-.t-N{background:var(--night)}
-.t-7{background:var(--seven)}
-.t-2{background:var(--two)}
-.t-9 { background: var(--green); }     /* Keep existing green */
-.t-930 { background: lightskyblue; }        /* Lighter/different green */
-.t-1030{background:var(--amber)}
-.t-730{background:#2db1e6}
-.t-800{background:#f68d3c}
-.t-1130{background:var(--red)}
-
-.week{
-  opacity:0;
-  transform:translateY(12px);
-  transition:opacity .35s ease, transform .35s ease;
-}
-.week:not(.hidden){
-  opacity:1;
-  transform:translateY(0);
+.off {
+  background: rgba(252, 165, 165, .12);
+  color: #f87171;
+  font-weight: 600;
+  border: 1px dashed var(--off);
+  padding: 4px 8px;
+  border-radius: 8px;
+  display: inline-block;
 }
 
-footer{margin-top:22px;font-size:.75rem;color:var(--muted);text-align:center}
+.badge {
+  display: inline-block;
+  padding: 4px 7px;
+  border-radius: 8px;
+  font-weight: 700;
+  color: #fff;
+  filter: brightness(1.1) saturate(1.1);
+  transition: transform .2s ease, filter .2s ease;
+}
+
+.badge:hover {
+  transform: scale(1.05);
+  filter: brightness(1.2);
+}
+
+/* Shift timing badges - different shifts ke liye different colors */
+.t-N {
+  background: var(--night);
+}
+
+.t-7 {
+  background: var(--seven);
+}
+
+.t-2 {
+  background: var(--two);
+}
+
+.t-9 {
+  background: var(--green);
+}
+
+/* Keep existing green */
+.t-930 {
+  background: lightskyblue;
+}
+
+/* Lighter/different green */
+.t-1030 {
+  background: var(--amber);
+}
+
+.t-730 {
+  background: #2db1e6;
+}
+
+.t-800 {
+  background: #f68d3c;
+}
+
+.t-1130 {
+  background: var(--red);
+}
+
+.week {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .35s ease, transform .35s ease;
+}
+
+.week:not(.hidden) {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+footer {
+  margin-top: 22px;
+  font-size: .75rem;
+  color: var(--muted);
+  text-align: center;
+}
 
 /* ========== Responsive Section (Card Week) ========== */
 .card.week {
@@ -338,7 +496,7 @@ footer{margin-top:22px;font-size:.75rem;color:var(--muted);text-align:center}
   }
 }
 
-/* ========== Mobile Friendly Enhancements ========== */
+/* ========== Mobile Friendly Enhancements - chhote screens ke liye ========== */
 .week table {
   display: block;
   overflow-x: auto;
@@ -352,44 +510,89 @@ footer{margin-top:22px;font-size:.75rem;color:var(--muted);text-align:center}
     padding: 0 10px;
   }
 
-  h1 { font-size: 1.5rem; }
-  .sub { font-size: 0.9rem; }
+  h1 {
+    font-size: 1.5rem;
+  }
 
-  .toolbar { flex-direction: column; gap: 8px; }
-  .toolbar button { width: 100%; font-size: 0.95rem; }
+  .sub {
+    font-size: 0.9rem;
+  }
 
-  .tabs { flex-wrap: wrap; gap: 6px; }
-  .tab { flex: 1 1 auto; text-align: center; font-size: 0.85rem; padding: 6px 10px; }
+  .toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
 
-  table th, table td { font-size: 0.75rem; padding: 6px 4px; }
-  .badge, .off { font-size: 0.85rem; padding: 4px 6px; }
+  .toolbar button {
+    width: 100%;
+    font-size: 0.95rem;
+  }
+
+  .tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tab {
+    flex: 1 1 auto;
+    text-align: center;
+    font-size: 0.85rem;
+    padding: 6px 10px;
+  }
+
+  table th, table td {
+    font-size: 0.75rem;
+    padding: 6px 4px;
+  }
+
+  .badge, .off {
+    font-size: 0.85rem;
+    padding: 4px 6px;
+  }
 }
 
-/* Phones */
+/* Phones ke liye extra small */
 @media (max-width: 480px) {
-  h1 { font-size: 1.3rem; }
-  .tab { font-size: 0.8rem; padding: 5px 8px; }
-  table th, table td { font-size: 0.7rem; padding: 5px 3px; }
-  .badge, .off { font-size: 0.75rem; }
+  h1 {
+    font-size: 1.3rem;
+  }
+
+  .tab {
+    font-size: 0.8rem;
+    padding: 5px 8px;
+  }
+
+  table th, table td {
+    font-size: 0.7rem;
+    padding: 5px 3px;
+  }
+
+  .badge, .off {
+    font-size: 0.75rem;
+  }
 }
 
-/* ========== Custom Scrollbar Styling ========== */
+/* ========== Custom Scrollbar Styling for tables ========== */
 .week table::-webkit-scrollbar {
   height: 8px;
 }
+
 .week table::-webkit-scrollbar-track {
   background: rgba(30, 38, 61, 0.8);
   border-radius: 10px;
 }
+
 .week table::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, var(--h1), var(--h2));
   border-radius: 10px;
   border: 2px solid rgba(30, 38, 61, 0.8);
 }
+
 .week table::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, var(--h2), var(--h1));
 }
-/* Firefox */
+
+/* Firefox scrollbar for tables */
 .week table {
   scrollbar-width: thin;
   scrollbar-color: var(--h1) rgba(30, 38, 61, 0.8);

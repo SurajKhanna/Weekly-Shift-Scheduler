@@ -1,43 +1,71 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Employee Shift Scheduler 🗓️</title>
-  <meta name="description" content="This will help plan the shift of the employees in a better way and save you a lot of time. P.S. You can also download the visible table as Excel using the above button.">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="styles.css">
-  <meta name="author" content="Suraj Khanna">
-</head>
+  <head>
+    <!-- Basic page setup - Page ki basic settings -->
+    <meta charset="utf-8" />
+    <title>Employee Shift Scheduler 🗓️</title>
+    <meta
+      name="description"
+      content="This will help plan the shift of the employees in a better way and save you a lot of time. P.S. You can also download the visible table as Excel using the above button."
+    />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    
+    <!-- CSS file link - Styling ke liye -->
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="author" content="Suraj Khanna" />
+  </head>
 
-<body>
-  <div class="wrap">
-    <header>
-      <h1 id="pageTitle">Employee Shift Scheduler 🗓️</h1>
-      <p class="sub">
-        This will help plan the shift of the employees in a better way and save you a lot of time.  
-        <br>💡 P.S. You can also download the visible table as Excel using the above button.
-      </p>
-    </header>
+  <body>
+    <!-- Main wrapper - Saara content isme wrap hai -->
+    <div class="wrap">
+      
+      <!-- Page header section - Title aur description -->
+      <header>
+        <h1 id="pageTitle">Employee Shift Scheduler 🗓️</h1>
+        <p class="sub">
+          This will help plan the shift of the employees in a better way and
+          save you a lot of time.
+          <br />💡 P.S. You can also download the visible table as Excel using
+          the above button.
+        </p>
+      </header>
 
-    <div class="toolbar">
-      <button id="regen">Regenerate roster</button>
-      <button id="dl">Download visible week ⇩</button>
+      <!-- Action buttons - Regenerate aur Download ke buttons -->
+      <div class="toolbar">
+        <!-- Nayi roster banane ka button -->
+        <button id="regen">Regenerate roster</button>
+        
+        <!-- Current week ko Excel mein download karne ka button -->
+        <button id="dl">Download visible week ⇩</button>
+      </div>
+
+      <!-- Week tabs navigation - Week 1, Week 2 wagerah ke tabs -->
+      <nav id="tabs" class="tabs"></nav>
+      
+      <!-- Main content area - Yahan schedule tables show honge -->
+      <main id="weeks"></main>
+
+      <!-- Page footer - Developer credit -->
+      <footer>Made with ❤️ by Shraddha Patil</footer>
     </div>
 
-    <nav id="tabs" class="tabs"></nav>
-    <main id="weeks"></main>
+    <!-- SVG effects - Button glow effect ke liye hidden SVG -->
+    <!-- Ye buttons ko fancy glow deta hai - dikhta nahi bas effect hai -->
+    <svg width="0" height="0">
+      <defs>
+        <!-- Button glow filter definition - Buttons ko shine dene ke liye -->
+        <filter id="btnGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blurEffect" />
+          <feMerge>
+            <feMergeNode in="blurEffect" />
+            <feMergeNode in="blurEffect" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+    </svg>
 
-    <footer>Made with ❤️ by Shraddha Patil</footer>
-  </div>
-
-  <!-- subtle glow for primary buttons -->
-  <svg width="0" height="0"><defs>
-    <filter id="btnGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs></svg>
-
-  <script src="logic.js"></script>
-</body>
+    <!-- JavaScript file - Saara logic aur functionality yahan se aati hai -->
+    <script src="logic.js"></script>
+  </body>
 </html>
