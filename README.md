@@ -1,9 +1,25 @@
-# 🗓️ Weekly Shift Scheduler
+# 🗓️ Employee Weekly Shift Scheduler
 
 A beautiful, interactive **weekly roster generator** built with **HTML, CSS, and JavaScript**.  
 It automatically assigns shifts with rules, allows **week-by-week navigation**, and supports **Excel export**.
 
-![Preview Screenshot](docs/screenshot.png)
+---
+
+## 💡 Why I Built This?
+
+A friend once told me how her manager spends hours every week preparing the shift roster manually.  
+It wasn’t just a simple list – there were many rules to keep in mind:  
+- Only a limited number of people can take leave on the same day  
+- Departments can’t be understaffed  
+- Some employees prefer specific timings  
+
+Doing this by hand again and again was tiring, error-prone, and honestly unfair to her manager’s time.  
+
+That’s when I thought – *why not create something small that can actually help?*  
+A tool that looks modern, works quickly, and saves precious hours every week.  
+
+This project isn’t about fancy tech – it’s about solving a real problem with a simple, thoughtful solution.  
+If it makes someone’s work-life easier, even a little, then the effort was completely worth it ❤️  
 
 ---
 
@@ -12,14 +28,14 @@ It automatically assigns shifts with rules, allows **week-by-week navigation**, 
 - 🎲 **Auto-generate shifts** with random weekly swaps  
 - 🗂️ **Tabbed weeks** (navigate easily)  
 - 🎨 **Modern UI** with gradients, badges, and hover effects  
-- 📥 **Download schedule to Excel** (`.xls` / `.xlsx`)  
+- 📥 **Download schedule to Excel**  
 - ⚡ **Lightweight** – pure vanilla JS (no heavy frameworks)  
 
 ---
 
 ## 🚀 Demo
 
-👉 Live Demo: [GitHub Pages Link](https://yourusername.github.io/weekly-shift-scheduler)  
+👉 Live Demo: (https://weekly-shift-scheduler.vercel.app)  
 
 ---
 
@@ -31,6 +47,8 @@ It automatically assigns shifts with rules, allows **week-by-week navigation**, 
  ┣ 📜 logic.js          # Scheduling + Excel export
  ┣ 📜 styles.css        # Modern gradient styling
  ┣ 📂 docs/             # Assets like screenshots
+    ┣ 📜 screenshot.png        # Main App Screenshot
+    ┣ 📜 excel.png             # Exported Excel Screenshot
  ┗ 📜 README.md
 ```
 
@@ -56,26 +74,16 @@ Exports the currently visible week to Excel with styled formatting.
 
 Supports:  
 - **HTML → .xls** export (preserves CSS look)  
-- **SheetJS → .xlsx** export (native Excel, basic styling)
 
 ---
 
 ## 📸 Screenshots
 
 ### Main UI
-![UI Preview](docs/ui-preview.png)
+![UI Preview](docs/screenshot.png)
 
 ### Excel Export
-![Excel Export](docs/excel-preview.png)
-
----
-
-## 🧑‍💻 Contributing
-
-Contributions are welcome!  
-- Fork the repo  
-- Create a feature branch  
-- Submit a Pull Request 🎉
+![Excel Export](docs/excel.png)
 
 ---
 
