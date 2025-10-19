@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/surajkh1/apollo.surajkhanna.com/
+    - /bin/cp -R * $DEPLOYPATH
