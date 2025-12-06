@@ -1,71 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Basic page setup - Page ki basic settings -->
     <meta charset="utf-8" />
-    <title>Employee Shift Scheduler 🗓️</title>
-    <meta
-      name="description"
-      content="This will help plan the shift of the employees in a better way and save you a lot of time. P.S. You can also download the visible table as Excel using the above button."
-    />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    
-    <!-- CSS file link - Styling ke liye -->
-    <link rel="stylesheet" href="styles.css" />
-    <meta name="author" content="Suraj Khanna" />
-  </head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShiftFlow Scheduler</title>
+    <meta name="description" content="Automated employee shift planning and management." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              slate: {
+                850: '#151e2e',
+                950: '#020617',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #0f172a;
+        color: #e2e8f0;
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1e293b; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #475569; 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #64748b; 
+      }
+    </style>
 
+<link rel="stylesheet" href="/index.css">
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/"
+  }
+}
+</script>
+  <script type="module" crossorigin src="./assets/index-BMvK6_d8.js"></script>
+</head>
   <body>
-    <!-- Main wrapper - Saara content isme wrap hai -->
-    <div class="wrap">
-      
-      <!-- Page header section - Title aur description -->
-      <header>
-        <h1 id="pageTitle">Employee Shift Scheduler 🗓️</h1>
-        <p class="sub">
-          This will help plan the shift of the employees in a better way and
-          save you a lot of time.
-          <br />💡 P.S. You can also download the visible table as Excel using
-          the above button.
-        </p>
-      </header>
-
-      <!-- Action buttons - Regenerate aur Download ke buttons -->
-      <div class="toolbar">
-        <!-- Nayi roster banane ka button -->
-        <button id="regen">Regenerate roster</button>
-        
-        <!-- Current week ko Excel mein download karne ka button -->
-        <button id="dl">Download visible week ⇩</button>
-      </div>
-
-      <!-- Week tabs navigation - Week 1, Week 2 wagerah ke tabs -->
-      <nav id="tabs" class="tabs"></nav>
-      
-      <!-- Main content area - Yahan schedule tables show honge -->
-      <main id="weeks"></main>
-
-      <!-- Page footer - Developer credit -->
-      <footer>Made with ❤️ for a friend...</footer>
-    </div>
-
-    <!-- SVG effects - Button glow effect ke liye hidden SVG -->
-    <!-- Ye buttons ko fancy glow deta hai - dikhta nahi bas effect hai -->
-    <svg width="0" height="0">
-      <defs>
-        <!-- Button glow filter definition - Buttons ko shine dene ke liye -->
-        <filter id="btnGlow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blurEffect" />
-          <feMerge>
-            <feMergeNode in="blurEffect" />
-            <feMergeNode in="blurEffect" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-    </svg>
-
-    <!-- JavaScript file - Saara logic aur functionality yahan se aati hai -->
-    <script src="logic.js"></script>
-  </body>
+    <div id="root"></div>
+</body>
 </html>
