@@ -1,31 +1,26 @@
-/* ========= Utility helpers - Basic helper functions ========= */
-// const fmt  = d => d.toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"});
+/* ═══════════════════════════════════════════════════════
+   SHIFT SCHEDULER — Core Logic
+   Made with ❤️ by Suraj Khanna
+   ═══════════════════════════════════════════════════════ */
+
 console.log(
-  "%c Made with ❤️ by Suraj Khanna ",
-  "color:#5b7cfa; font-size:14px; font-weight:bold;"
+  "%c✦ Shift Scheduler %c Made with ❤️ by Suraj Khanna",
+  "color:#6366f1;font-weight:bold;font-size:13px;",
+  "color:#94a3b8;font-size:12px;"
 )
 
-// Date ko US format mein convert karta hai - makes date look like "4 Sep 2025"
-const fmt = (dateToFormat) =>
-  dateToFormat.toLocaleDateString("en-US", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  })
+/* ── Utilities ── */
+const fmt = d => d.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })
+const dow = d => d.toLocaleDateString("en-IN", { weekday: "short" })
+const dowFull = d => d.toLocaleDateString("en-IN", { weekday: "long" })
+const pick = a => a[(Math.random() * a.length) | 0]
+const same = (a, b) => a && b && a.getTime() === b.getTime()
+const isToday = d => { const t = new Date(); return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear() }
+const isSunday = d => d.getDay() === 0
 
-// Day of week nikalta hai - like "Monday", "Tuesday" etc
-const dow = (dateToCheck) => dateToCheck.toLocaleDateString("en-IN", { weekday: "long" })
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"]
 
-// Array se random item pick karta hai - jaise lucky draw
-const pick = (arrayToPickFrom) => arrayToPickFrom[(Math.random() * arrayToPickFrom.length) | 0]
-
-// Array ko shuffle karta hai - cards shuffle karne jaisa
-const shuffle = (arrayToShuffle) => [...arrayToShuffle].sort(() => Math.random() - 0.5)
-
-// Do dates same hai ya nahi check karta hai
-const same = (firstDate, secondDate) => firstDate && secondDate && firstDate.getTime() === secondDate.getTime()
-
-/* ========= Fixed staff - Permanent employee list for cloning ========= */
+/* ── Department Data ── */
 const Departments = {
   Reception: ["Sagar", "Roshan", "Karan"],
   OPD: ["Anagha", "Shraddha Tipale", "Shubhangi", "Mamta"],
@@ -33,516 +28,450 @@ const Departments = {
   AppointmentDesk: ["Vanita", "Gaurav"],
 }
 
-/* ========= Split month into weeks - Month ko weeks mein baantna ========= */
-function splitWeeks(yearToSplit, monthToSplit) {
-  const monthLength = new Date(yearToSplit, monthToSplit + 1, 0).getDate() // Month mein kitne din hai
-  const allDaysInMonth = [], // Saare din store karne ke liye
-        weeksArray = [], // Final weeks array
-        currentWeek = [] // Current week building karne ke liye
-  
-  // Month ke saare dates banao
-  for (let dayNumber = 1; dayNumber <= monthLength; dayNumber++) {
-    allDaysInMonth.push(new Date(yearToSplit, monthToSplit, dayNumber))
-  }
+const depLabel = n => ({
+  Reception: "Reception (GF)",
+  OPD: "OPD (1F)",
+  CallCenter: "Call Center (B1)",
+  AppointmentDesk: "Appointment Desk (1F)",
+})[n]
 
-  // Har day check karo and weeks banao
-  allDaysInMonth.forEach((currentDate) => {
-    currentWeek.push(currentDate)
-    if (currentDate.getDay() === 0) {
-      // Sunday hai matlab week khatam - Sunday → end of week
-      weeksArray.push(currentWeek.slice()) // Copy banao current week ka
-      currentWeek.length = 0 // Array clear karo
-    }
+/* ── Shift Legend ── */
+const LEGEND = [
+  { cls: "t-N", label: "Night" },
+  { cls: "t-7", label: "7 AM" },
+  { cls: "t-2", label: "2 PM" },
+  { cls: "t-9", label: "9:00" },
+  { cls: "t-930", label: "9:30" },
+  { cls: "t-1030", label: "10:30" },
+  { cls: "t-730", label: "7:30" },
+  { cls: "t-800", label: "8:00" },
+  { cls: "t-1130", label: "11:30" },
+]
+
+/* ── State ── */
+let currentDate = new Date()
+let viewAll = false
+let cachedWeeks = null
+
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem("ss_state") || "{}")
+    if (s.y != null && s.m != null) currentDate = new Date(s.y, s.m, 1)
+    if (s.theme) document.documentElement.setAttribute("data-theme", s.theme)
+  } catch {}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem("ss_state", JSON.stringify({
+      y: currentDate.getFullYear(),
+      m: currentDate.getMonth(),
+      theme: document.documentElement.getAttribute("data-theme") || "dark"
+    }))
+  } catch {}
+}
+
+/* ── Split Month → Weeks (Mon-Sun) ── */
+function splitWeeks(year, month) {
+  const len = new Date(year, month + 1, 0).getDate()
+  const days = [], weeks = []
+  let week = []
+
+  for (let d = 1; d <= len; d++) days.push(new Date(year, month, d))
+
+  days.forEach(d => {
+    week.push(d)
+    if (d.getDay() === 0) { weeks.push(week.slice()); week.length = 0 }
   })
 
-  // Agar last week incomplete hai, toh next month se days add karo until Sunday
-  if (currentWeek.length) {
-    let nextMonthDate = new Date(yearToSplit, monthToSplit + 1, 1)
-    while (nextMonthDate.getDay() !== 0) {
-      // Sunday tak add karte raho
-      currentWeek.push(new Date(nextMonthDate))
-      nextMonthDate.setDate(nextMonthDate.getDate() + 1)
-    }
-    currentWeek.push(new Date(nextMonthDate)) // Sunday bhi include karo
-    weeksArray.push(currentWeek)
+  if (week.length) {
+    let nx = new Date(year, month + 1, 1)
+    while (nx.getDay() !== 0) { week.push(new Date(nx)); nx.setDate(nx.getDate() + 1) }
+    week.push(new Date(nx))
+    weeks.push(week)
   }
-  return weeksArray
+  return weeks
 }
 
-/* ========= Build table - HTML table banane ke liye ========= */
-// Department names ko proper labels deta hai
-const depLabel = (departmentName) =>
-  ({
-    Reception: "Reception (GF)",
-    OPD: "OPD (1F)", 
-    CallCenter: "Call Center (B1)",
-    AppointmentDesk: "Appointment Desk (1F)",
-  }[departmentName])
-
-// Week ka complete HTML table banata hai
-function tableHTML(weekDays, weekScheduleObject, weekIndex) {
-  const scheduleData = weekScheduleObject.data
-  
-  // Table headers banao - department aur employee names ke liye
-  const topHeaders = [
-    '<th rowspan="2">Department</th><th rowspan="2">Name of Employee</th>',
-  ]
-  const dateHeaders = []
-  
-  // Har din ke liye headers add karo
-  weekDays.forEach((currentDay) => {
-    topHeaders.push(`<th>${dow(currentDay)}</th>`) // Day name like Monday
-    dateHeaders.push(`<th>${fmt(currentDay)}</th>`) // Date like 4 Sep
-  })
-  
-  const tableHead = `<thead><tr>${topHeaders.join("")}</tr><tr>${dateHeaders.join("")}</tr></thead>`
-  const tableRows = []
-  
-  // Department wise rows banane ka function
-  const createDepartmentBlock = (deptName, employeeArray) =>
-    employeeArray.forEach((personName, employeeIndex) => {
-      const rowCells = []
-      
-      // Pehla employee hai toh department name add karo
-      if (employeeIndex === 0)
-        rowCells.push(
-          `<th class="dept" rowspan="${employeeArray.length}">${depLabel(deptName)}</th>`
-        )
-      
-      rowCells.push(`<th>${personName}</th>`) // Employee name
-      
-      // Har din ke liye schedule add karo
-      weekDays.forEach((dayToCheck) =>
-        rowCells.push(`<td>${scheduleData[deptName][personName][fmt(dayToCheck)] || ""}</td>`)
-      )
-      tableRows.push(`<tr>${rowCells.join("")}</tr>`)
-    })
-
-  // Saare departments ke blocks banao
-  createDepartmentBlock("Reception", weekScheduleObject.Reception)
-  createDepartmentBlock("OPD", weekScheduleObject.OPD)
-  createDepartmentBlock("CallCenter", weekScheduleObject.CallCenter)
-  createDepartmentBlock("AppointmentDesk", weekScheduleObject.AppointmentDesk)
-
-  return `<section class="card week" data-w="${weekIndex}">
-    <div style="margin-bottom:8px"><span class="badge t-7">Week ${weekIndex}</span>
-      <small class="muted">(${fmt(weekDays[0])} → ${fmt(weekDays.at(-1))})</small>
-    </div><br> <div class="table-wrap"> <table>${tableHead}<tbody>${tableRows.join(
-    ""
-  )}</tbody></table> </div> </section>`
-}
-
-/* ========= Render month - Pura month display karna ========= */
-function renderMonth(yearToRender, monthToRender) {
-  const monthWeeks = splitWeeks(yearToRender, monthToRender),
-        mainContainer = document.getElementById("weeks"),
-        tabsContainer = document.getElementById("tabs")
-  
-  // Containers clear karo
-  mainContainer.innerHTML = ""
-  tabsContainer.innerHTML = ""
-  
-  // Har week ke liye table aur tab banao
-  monthWeeks.forEach((weekDays, weekIndex) => {
-    const weekSchedule = buildWeek(weekDays)
-    mainContainer.insertAdjacentHTML("beforeend", tableHTML(weekDays, weekSchedule, weekIndex + 1))
-    tabsContainer.insertAdjacentHTML(
-      "beforeend",
-      `<button class="tab" data-w="${weekIndex + 1}">Week ${weekIndex + 1}</button>`
-    )
-  })
-  
-  // Current week find karo and activate karo
-  const todayDate = new Date(),
-        currentWeekIndex =
-          todayDate.getFullYear() === yearToRender && todayDate.getMonth() === monthToRender
-            ? monthWeeks.findIndex((weekToCheck) =>
-                weekToCheck.some((dayToCheck) => dayToCheck.getDate() === todayDate.getDate())
-              ) + 1
-            : 1
-            
-  activate(currentWeekIndex)
-  
-  // Tab click handlers
-  tabsContainer.onclick = (clickEvent) => {
-    const weekNumber = clickEvent.target.dataset.w
-    weekNumber && activate(+weekNumber)
-  }
-}
-
-// Particular week ko active karta hai
-function activate(weekNumber) {
-  // Saare tabs se active class hatao, selected wale mein lagao
-  document
-    .querySelectorAll(".tab")
-    .forEach((tabElement) => tabElement.classList.toggle("active", +tabElement.dataset.w === weekNumber))
-    
-  // Saare weeks hide karo, selected wala show karo
-  document
-    .querySelectorAll(".week")
-    .forEach((weekElement) => weekElement.classList.toggle("hidden", +weekElement.dataset.w !== weekNumber))
-}
-
-/* ========= Excel export - Excel file download karne ke liye ========= */
-function download() {
-  const currentTable = document.querySelector(".week:not(.hidden) table")
-  if (!currentTable) return // Koi table nahi mili toh return
-
-  // Week name nikalo
-  let weekNameForFile =
-    document.querySelector(".tab.active")?.textContent.trim() ||
-    document
-      .querySelector(".week:not(.hidden) .badge.t-7")
-      ?.textContent.trim() ||
-    "Week"
-
-  // Current date and time nikalo filename ke liye
-  const currentDateTime = new Date()
-  const padNumber = (numberToPad) => String(numberToPad).padStart(2, "0")
-  const dateStringForFile = `${padNumber(currentDateTime.getDate())} ${currentDateTime.toLocaleString("en-US", {
-    month: "short",
-  })} ${currentDateTime.getFullYear()}`
-  
-  // Time formatting - 12 hour format
-  let hourFor12Format = currentDateTime.getHours(),
-      minutesFormatted = padNumber(currentDateTime.getMinutes())
-  const amPmIndicator = hourFor12Format >= 12 ? "PM" : "AM"
-  hourFor12Format = hourFor12Format % 12
-  if (hourFor12Format === 0) hourFor12Format = 12
-  const timeStringForFile = `${padNumber(hourFor12Format)}.${minutesFormatted} ${amPmIndicator}`
-  
-  // Final filename banao
-  const filenameToSave = `${weekNameForFile} - ${dateStringForFile} - ${timeStringForFile}.xls`
-
-  // Excel ke liye styling - fancy colors aur formatting
-  const excelStyling = `
-    <style>
-      body { background:#1e263d; margin:0; }
-      table { margin: 36px auto; background: #262f49; border-radius: 18px; border-collapse: separate !important; border-spacing: 0; box-shadow: 0 6px 40px #0006; font-family: 'Poppins',Segoe UI,Arial,sans-serif; }
-      thead th { background: linear-gradient(90deg,#33408e,#5b7cfa 60%,#30c9e8); font-size: 1.08rem; color: #f3f7ff; border-right: 1.5px solid #253a65; border-bottom: 2.5px solid #3c6ee0; padding:14px 12px; letter-spacing: 0.9px; font-weight: bold; text-align:center; }
-      thead tr:nth-child(2) th { background: #21305b; color: #dbeafe; font-weight: 600; border-bottom:1.5px solid #4f5bbd; }
-      tbody th { background:#212a3d; color:#ffe2f1; font-weight: bold; text-align:left; padding:12px; border-right:1px solid #313970; border-bottom:1px solid #2c335a; }
-      tbody td { padding:11px 6px; color:#f3f7ff; text-align:center; font-size:1.03rem; border-right:1px solid #313970; border-bottom:1px solid #242b4f; background: rgba(35, 45, 63, 0.91); }
-      tbody tr:nth-child(even) td { background:#293354; }
-      .badge, .off { border-radius:8px; padding:5px 9px; font-weight:600; display:inline-block; font-size:1.06rem; text-align:center; }
-      .badge { background: #4750b4; color: #fff; }
-      .off   { color:#ec6174; background:rgba(240,51,80,.12); border:1px dashed #e67397; }
-      section { display:flex; flex-direction:column; align-items:center; }
-    </style>
-  `
-
-  // Complete HTML banao Excel ke liye
-  const htmlForExcel = `
-    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
-      <head><meta charset="utf-8">${excelStyling}</head>
-      <body>
-        <section>
-          <div style="margin-bottom:17px; font-size:1.18rem; color:#95b8ff; font-weight:600; letter-spacing:0.7px;">
-            ${weekNameForFile} | Exported on ${dateStringForFile} ${timeStringForFile}
-          </div>
-          ${currentTable.outerHTML}
-        </section>
-      </body>
-    </html>
-  `
-
-  // File download karo
-  const excelBlob = new Blob([htmlForExcel], { type: "application/vnd.ms-excel" })
-  const downloadLink = document.createElement("a")
-  downloadLink.href = URL.createObjectURL(excelBlob)
-  downloadLink.download = filenameToSave
-  downloadLink.click()
-}
-
-/* ========= Animated button helpers - Button animations ke liye ========= */
-function setButtonLoading(buttonElement, loadingText, emojiForLoading = "🔄", animationStyle = "spin") {
-  // Agar button already loading hai toh return
-  if (buttonElement.dataset.loading === "true") return
-  buttonElement.dataset.loading = "true"
-  buttonElement.classList.add("loading")
-
-  // Original text save karo
-  const originalButtonText = buttonElement.dataset.originalText || buttonElement.textContent
-  buttonElement.dataset.originalText = originalButtonText
-
-  let dotCounter = 0
-  buttonElement.innerHTML = `<span class="spinner-${animationStyle}">${emojiForLoading}</span> ${loadingText}`
-
-  // Dots animation - har 500ms mein dots change karo
-  const dotInterval = setInterval(() => {
-    dotCounter = (dotCounter + 1) % 4
-    buttonElement.innerHTML = `<span class="spinner-${animationStyle}">${emojiForLoading}</span> ${loadingText}${".".repeat(
-      dotCounter
-    )}`
-  }, 500)
-
-  // Success function return karo
-  return (successMessage = "✅ Done!") => {
-    clearInterval(dotInterval)
-    buttonElement.textContent = successMessage
-    buttonElement.classList.remove("loading")
-    // 1.5 second baad original text wapas lao
-    setTimeout(() => {
-      buttonElement.textContent = originalButtonText
-      buttonElement.dataset.loading = "false"
-    }, 1500)
-  }
-}
-
-/* ========= Buttons & bootstrap - Button events aur initial load ========= */
-// Regenerate button - Nayi schedule banane ke liye
-document.getElementById("regen").onclick = () => {
-  const regenButton = document.getElementById("regen")
-  const finishLoading = setButtonLoading(regenButton, "Regenerating", "🔄", "spin")
-  setTimeout(() => {
-    renderMonth(currentDate.getFullYear(), currentDate.getMonth())
-    finishLoading("✅ Roster Ready!")
-  }, 1200)
-}
-
-// Download button - Excel download ke liye
-document.getElementById("dl").onclick = () => {
-  const downloadButton = document.getElementById("dl")
-  const finishDownload = setButtonLoading(downloadButton, "Downloading", "⬇️", "bounce")
-  setTimeout(() => {
-    download()
-    finishDownload("✅ Downloaded!")
-  }, 1200)
-}
-
-// Page load hote hi current month ka schedule banao
-const currentDate = new Date()
-renderMonth(currentDate.getFullYear(), currentDate.getMonth())
-
-// Main buildWeek function - Ek week ka complete schedule banata hai
+/* ── Build Week Schedule ── */
 function buildWeek(weekDays) {
-  // Random decide karo ki Jayshree aur Shubhangi ko swap karna hai ya nahi
-  const shouldSwapThisWeek = Math.random() < 0.5
+  const swap = Math.random() < 0.5
 
-  // Staff arrays banao - original list se copy karo aur sort karo
-  let receptionStaffList = [...Departments.Reception].sort()
-  
-  // OPD staff - Shubhangi aur Anagha ko temporarily hatao
-  let opdStaffList = [...Departments.OPD]
-    .filter((employeeName) => employeeName !== "Shubhangi" && employeeName !== "Anagha")
-    .sort()
-    
-  // Call center staff - Jayshree ko temporarily hatao  
-  let callCenterStaffList = [...Departments.CallCenter]
-    .filter((employeeName) => employeeName !== "Jayshree")
-    .sort()
-    
-  // Weekly swap logic - Jayshree aur Shubhangi ka departments
-  if (shouldSwapThisWeek) {
-    opdStaffList.push("Jayshree")      // Jayshree goes to OPD
-    callCenterStaffList.push("Shubhangi") // Shubhangi goes to Call Center
-  } else {
-    opdStaffList.push("Shubhangi")     // Shubhangi stays in OPD
-    callCenterStaffList.push("Jayshree")  // Jayshree stays in Call Center
-  }
-  
-  // Re-sort after adding swapped employees
-  opdStaffList.sort()
-  callCenterStaffList.sort()
-  let appointmentDeskStaffList = [...Departments.AppointmentDesk].sort()
+  let recep = [...Departments.Reception].sort()
+  let opd = [...Departments.OPD].filter(n => n !== "Shubhangi" && n !== "Anagha").sort()
+  let cc = [...Departments.CallCenter].filter(n => n !== "Jayshree").sort()
 
-  // Schedule object banao - har department aur employee ke liye
-  const scheduleObject = {}
-  ;[
-    receptionStaffList,
-    [...opdStaffList, "Anagha"], // Anagha ko wapas add karo OPD mein
-    callCenterStaffList,
-    appointmentDeskStaffList,
-  ].forEach((staffArray, departmentIndex) => {
-    const deptName = ["Reception", "OPD", "CallCenter", "AppointmentDesk"][departmentIndex]
-    scheduleObject[deptName] = {}
-    staffArray.forEach((personName) => (scheduleObject[deptName][personName] = {}))
+  if (swap) { opd.push("Jayshree"); cc.push("Shubhangi") }
+  else { opd.push("Shubhangi"); cc.push("Jayshree") }
+  opd.sort(); cc.sort()
+  let appt = [...Departments.AppointmentDesk].sort()
+
+  const sched = {}
+  ;[recep, [...opd, "Anagha"], cc, appt].forEach((staff, i) => {
+    const dept = ["Reception","OPD","CallCenter","AppointmentDesk"][i]
+    sched[dept] = {}
+    staff.forEach(n => sched[dept][n] = {})
   })
 
-  // Unique off days assign karne ka function - har department mein alag alag din off
-  function assignUniqueOffs(staffArray, availableDays) {
-    let offsObject = {}
-    let daysAvailable = [...availableDays]
-    staffArray.forEach((employeeName) => {
-      if (daysAvailable.length === 0) daysAvailable = [...availableDays] // Days khatam ho gaye toh recycle
-      let selectedDay = pick(daysAvailable)
-      offsObject[employeeName] = selectedDay
-      // Selected day ko remove karo taaki duplicate na ho
-      daysAvailable = daysAvailable.filter((dayToCheck) => !same(dayToCheck, selectedDay))
+  function assignOffs(staff, days) {
+    let offs = {}, avail = [...days]
+    staff.forEach(n => {
+      if (!avail.length) avail = [...days]
+      const d = pick(avail)
+      offs[n] = d
+      avail = avail.filter(x => !same(x, d))
     })
-    return offsObject
+    return offs
   }
 
-  // Har department ke liye off days decide karo
-  const offDaysForDepartments = {
-    Reception: assignUniqueOffs(receptionStaffList, (allWeekDays = [...weekDays])),
-    OPD: assignUniqueOffs([...opdStaffList, "Anagha"], [...weekDays]),
-    CallCenter: assignUniqueOffs(callCenterStaffList, [...weekDays]),
-    AppointmentDesk: assignUniqueOffs(appointmentDeskStaffList, [...weekDays]),
+  const offs = {
+    Reception: assignOffs(recep, [...weekDays]),
+    OPD: assignOffs([...opd, "Anagha"], [...weekDays]),
+    CallCenter: assignOffs(cc, [...weekDays]),
+    AppointmentDesk: assignOffs(appt, [...weekDays]),
   }
 
-  // Shraddha P ka special schedule - Call Center mein variety chahiye
-  const shraddhaPTimings = {}
-  let workingDays = weekDays.filter((dayToCheck) => dayToCheck.getDay() !== 0) // Sunday ko chhod do
-  let tenThirtySelectedDay = pick(workingDays) // Ek din 10:30 shift
-  let sevenThirtyCount = 0,
-      eightOClockCount = 0
-      
-  workingDays.forEach((currentDay) => {
-    if (same(currentDay, tenThirtySelectedDay)) {
-      shraddhaPTimings[fmt(currentDay)] = "10:30"
-    } else {
-      // 7:30 aur 8:00 mein balance banao - max 3-3
-      if (sevenThirtyCount < 3 && eightOClockCount < 3) {
-        if (Math.random() < 0.5) {
-          shraddhaPTimings[fmt(currentDay)] = "7:30"
-          sevenThirtyCount++
-        } else {
-          shraddhaPTimings[fmt(currentDay)] = "8:00"
-          eightOClockCount++
-        }
-      } else if (sevenThirtyCount >= 3) {
-        shraddhaPTimings[fmt(currentDay)] = "8:00"
-        eightOClockCount++
-      } else {
-        shraddhaPTimings[fmt(currentDay)] = "7:30"
-        sevenThirtyCount++
-      }
-    }
+  // Shraddha P timing
+  const spTime = {}
+  const workDays = weekDays.filter(d => d.getDay() !== 0)
+  const td = pick(workDays)
+  let c730 = 0, c800 = 0
+  workDays.forEach(d => {
+    if (same(d, td)) { spTime[fmt(d)] = "10:30" }
+    else if (c730 < 3 && c800 < 3) { Math.random() < 0.5 ? (spTime[fmt(d)] = "7:30", c730++) : (spTime[fmt(d)] = "8:00", c800++) }
+    else if (c730 >= 3) { spTime[fmt(d)] = "8:00"; c800++ }
+    else { spTime[fmt(d)] = "7:30"; c730++ }
   })
 
-  // Appointment Desk ka alternating schedule - Vanita aur Gaurav alternate shifts
-  const appointmentDeskTimings = { Vanita: {}, Gaurav: {} }
-  let nonSundayDays = weekDays.filter((dayToCheck) => dayToCheck.getDay() !== 0)
-  let isVanitaMorning = true // Starting with Vanita morning shift
-  
-  nonSundayDays.forEach((currentDay) => {
-    const vanitaSlot = isVanitaMorning ? "9:30" : "2"      // Morning ya afternoon
-    const gauravSlot = isVanitaMorning ? "2" : "9:30"      // Opposite of Vanita
-    appointmentDeskTimings["Vanita"][fmt(currentDay)] = vanitaSlot
-    appointmentDeskTimings["Gaurav"][fmt(currentDay)] = gauravSlot
-    isVanitaMorning = !isVanitaMorning // Next day flip karo
+  // Appointment desk alternating
+  const apt = { Vanita: {}, Gaurav: {} }
+  let vm = true
+  weekDays.filter(d => d.getDay() !== 0).forEach(d => {
+    apt.Vanita[fmt(d)] = vm ? "9:30" : "2"
+    apt.Gaurav[fmt(d)] = vm ? "2" : "9:30"
+    vm = !vm
   })
 
-  // Helper functions - Schedule mein data daalne ke liye
-  const putSchedule = (departmentName, employeeName, dayDate, scheduleValue) => 
-    (scheduleObject[departmentName][employeeName][fmt(dayDate)] = scheduleValue)
-    
-  const createBadge = (cssClass, displayText) => `<span class="badge ${cssClass}">${displayText}</span>`
-  
-  const OFF_DISPLAY = '<span class="off">Week&nbsp;Off</span>'
-  
-  // Time slots ke liye CSS classes
-  const timeSlotClasses = {
-    N: "t-N",
-    7: "t-7", 
-    2: "t-2",
-    "9:00": "t-9",
-    "9:30": "t-930",
-    "10:30": "t-1030",
-    "7:30": "t-730",
-    "8:00": "t-800", 
-    "11:30": "t-1130",
-  }
+  const put = (dept, name, day, val) => sched[dept][name][fmt(day)] = val
+  const badge = (cls, txt) => `<span class="badge ${cls}">${txt}</span>`
+  const OFF = '<span class="off">Week&nbsp;Off</span>'
+  const tc = { N:"t-N", 7:"t-7", 2:"t-2", "9:00":"t-9", "9:30":"t-930", "10:30":"t-1030", "7:30":"t-730", "8:00":"t-800", "11:30":"t-1130" }
 
-  // Har din ka schedule fill karo
-  weekDays.forEach((currentDay, dayIndex) => {
-    // ---------- Reception Department ----------
-    receptionStaffList.forEach((employeeName) => {
-      if (same(currentDay, offDaysForDepartments.Reception[employeeName])) {
-        putSchedule("Reception", employeeName, currentDay, OFF_DISPLAY)
-      } else if (employeeName === "Karan") {
-        // Karan hamesha Night shift
-        putSchedule("Reception", employeeName, currentDay, createBadge("t-N", "N"))
-      } else if (employeeName === "Sagar") {
-        // Sagar alternate karta hai 7 aur 2 shift mein
-        putSchedule(
-          "Reception",
-          employeeName, 
-          currentDay,
-          createBadge(timeSlotClasses[dayIndex % 2 === 0 ? "7" : "2"], dayIndex % 2 === 0 ? "7" : "2")
-        )
-      } else if (employeeName === "Roshan") {
-        // Roshan opposite of Sagar - jab Sagar 7 tab ye 2
-        putSchedule(
-          "Reception",
-          employeeName,
-          currentDay, 
-          createBadge(timeSlotClasses[dayIndex % 2 === 0 ? "2" : "7"], dayIndex % 2 === 0 ? "2" : "7")
-        )
+  weekDays.forEach((day, di) => {
+    // Reception
+    recep.forEach(n => {
+      if (same(day, offs.Reception[n])) put("Reception", n, day, OFF)
+      else if (n === "Karan") put("Reception", n, day, badge("t-N","N"))
+      else if (n === "Sagar") { const s = di%2===0?"7":"2"; put("Reception", n, day, badge(tc[s], s)) }
+      else if (n === "Roshan") { const s = di%2===0?"2":"7"; put("Reception", n, day, badge(tc[s], s)) }
+    })
+
+    // OPD
+    const slots = ["9:30","10:30"]
+    opd.forEach((n, ei) => {
+      if (same(day, offs.OPD[n])) put("OPD", n, day, OFF)
+      else put("OPD", n, day, badge(tc[slots[(ei+di)%2]], slots[(ei+di)%2]))
+    })
+    if (same(day, offs.OPD["Anagha"])) put("OPD","Anagha", day, OFF)
+    else put("OPD","Anagha", day, badge("t-9","9:00"))
+
+    // Call Center
+    const swapped = swap ? "Shubhangi" : "Jayshree"
+    cc.forEach(n => {
+      if (same(day, offs.CallCenter[n])) put("CallCenter", n, day, OFF)
+      else if (n === "Prasad") put("CallCenter", n, day, badge("t-1130","11:30"))
+      else if (n === "Shraddha P") { const s = spTime[fmt(day)] || "7:30"; put("CallCenter", n, day, badge(tc[s], s)) }
+      else if (n === swapped) {
+        const ss = spTime[fmt(day)]
+        if (!ss) { const r = pick(["7:30","8:00"]); put("CallCenter", n, day, badge(tc[r], r)) }
+        else if (ss === "7:30") put("CallCenter", n, day, badge("t-800","8:00"))
+        else if (ss === "8:00") put("CallCenter", n, day, badge("t-730","7:30"))
+        else if (ss === "10:30") { const r = pick(["7:30","8:00"]); put("CallCenter", n, day, badge(tc[r], r)) }
       }
     })
 
-    // ---------- OPD Department ---------- 
-    let opdTimeSlots = ["9:30", "10:30"] // Do slots available
-    opdStaffList.forEach((employeeName, employeeIndex) => {
-      if (same(currentDay, offDaysForDepartments.OPD[employeeName])) {
-        putSchedule("OPD", employeeName, currentDay, OFF_DISPLAY)
-      } else {
-        // Cycle through time slots based on day and employee index
-        const assignedSlot = opdTimeSlots[(employeeIndex + dayIndex) % 2]
-        putSchedule("OPD", employeeName, currentDay, createBadge(timeSlotClasses[assignedSlot], assignedSlot))
-      }
-    })
-    
-    // Anagha ka special case - hamesha 9:00 shift
-    if (same(currentDay, offDaysForDepartments.OPD["Anagha"])) {
-      putSchedule("OPD", "Anagha", currentDay, OFF_DISPLAY)
-    } else {
-      putSchedule("OPD", "Anagha", currentDay, createBadge("t-9", "9:00"))
-    }
-
-    // ---------- Call Center Department ----------
-    let swappedEmployee = shouldSwapThisWeek ? "Shubhangi" : "Jayshree" // Kon swap hua hai
-    callCenterStaffList.forEach((employeeName) => {
-      if (same(currentDay, offDaysForDepartments.CallCenter[employeeName])) {
-        putSchedule("CallCenter", employeeName, currentDay, OFF_DISPLAY)
-      } else if (employeeName === "Prasad") {
-        // Prasad hamesha 11:30 shift
-        putSchedule("CallCenter", employeeName, currentDay, createBadge("t-1130", "11:30"))
-      } else if (employeeName === "Shraddha P") {
-        // Shraddha P ka pre-planned schedule use karo
-        let assignedSlot = shraddhaPTimings[fmt(currentDay)] || "7:30"
-        putSchedule("CallCenter", employeeName, currentDay, createBadge(timeSlotClasses[assignedSlot], assignedSlot))
-      } else if (employeeName === swappedEmployee) {
-        // Swapped employee ka timing Shraddha P ke opposite rakho
-        let shraddhaSlot = shraddhaPTimings[fmt(currentDay)]
-        if (!shraddhaSlot) {
-          // Agar Shraddha ka slot nahi mila toh random assign karo
-          let randomSlot = pick(["7:30", "8:00"])
-          putSchedule("CallCenter", employeeName, currentDay, createBadge(timeSlotClasses[randomSlot], randomSlot))
-        } else if (shraddhaSlot === "7:30") {
-          // Shraddha 7:30 hai toh ye 8:00 lega
-          putSchedule("CallCenter", employeeName, currentDay, createBadge("t-800", "8:00"))
-        } else if (shraddhaSlot === "8:00") {
-          // Shraddha 8:00 hai toh ye 7:30 lega
-          putSchedule("CallCenter", employeeName, currentDay, createBadge("t-730", "7:30"))
-        } else if (shraddhaSlot === "10:30") {
-          // Shraddha 10:30 hai toh koi bhi de sakte hai
-          let randomSlot = pick(["7:30", "8:00"])
-          putSchedule("CallCenter", employeeName, currentDay, createBadge(timeSlotClasses[randomSlot], randomSlot))
-        }
-      }
-    })
-
-    // ---------- Appointment Desk Department ----------
-    appointmentDeskStaffList.forEach((employeeName) => {
-      if (same(currentDay, offDaysForDepartments.AppointmentDesk[employeeName])) {
-        putSchedule("AppointmentDesk", employeeName, currentDay, OFF_DISPLAY)
-      } else {
-        // Pre-planned alternating schedule use karo
-        const assignedSlot = appointmentDeskTimings[employeeName][fmt(currentDay)] || "9:30"
-        putSchedule("AppointmentDesk", employeeName, currentDay, createBadge(timeSlotClasses[assignedSlot], assignedSlot))
-      }
+    // Appointment Desk
+    appt.forEach(n => {
+      if (same(day, offs.AppointmentDesk[n])) put("AppointmentDesk", n, day, OFF)
+      else { const s = apt[n][fmt(day)] || "9:30"; put("AppointmentDesk", n, day, badge(tc[s], s)) }
     })
   })
 
-  // Final week object return karo with all staff lists and schedule data
-  return {
-    Reception: receptionStaffList,
-    OPD: [...opdStaffList, "Anagha"], // Anagha ko wapas add kar diya
-    CallCenter: callCenterStaffList,
-    AppointmentDesk: appointmentDeskStaffList,
-    data: scheduleObject, // Actual schedule data
+  return { Reception: recep, OPD: [...opd,"Anagha"], CallCenter: cc, AppointmentDesk: appt, data: sched }
+}
+
+/* ── Stats ── */
+function statsHTML(weekDays, ws) {
+  const depts = ["Reception","OPD","CallCenter","AppointmentDesk"]
+  let html = '<div class="stats-row">'
+  depts.forEach(dept => {
+    (ws[dept] || []).forEach(name => {
+      let shifts = 0, off = 0
+      weekDays.forEach(d => {
+        const v = ws.data[dept]?.[name]?.[fmt(d)] || ""
+        if (v.includes("Off") || v.includes("off")) off++
+        else if (v) shifts++
+      })
+      html += `<span class="stat-chip"><span class="stat-name">${name}</span>${shifts}s <span class="stat-off">${off} off</span></span>`
+    })
+  })
+  return html + '</div>'
+}
+
+/* ── Table HTML ── */
+function tableHTML(weekDays, ws, idx) {
+  const data = ws.data
+  const th1 = ['<th rowspan="2">Dept</th><th rowspan="2">Employee</th>']
+  const th2 = []
+
+  weekDays.forEach(d => {
+    const cls = [isSunday(d) ? "col-sun" : "", isToday(d) ? "col-today" : ""].filter(Boolean).join(" ")
+    th1.push(`<th class="${cls}">${dow(d)}</th>`)
+    th2.push(`<th class="${cls}">${fmt(d)}</th>`)
+  })
+
+  const thead = `<thead><tr>${th1.join("")}</tr><tr>${th2.join("")}</tr></thead>`
+  const rows = []
+
+  const addBlock = (dept, staff) =>
+    staff.forEach((name, i) => {
+      const cells = []
+      if (i === 0) cells.push(`<th class="dept" rowspan="${staff.length}">${depLabel(dept)}</th>`)
+      cells.push(`<th>${name}</th>`)
+      weekDays.forEach(d => {
+        const cls = [isSunday(d) ? "col-sun" : "", isToday(d) ? "col-today" : ""].filter(Boolean).join(" ")
+        cells.push(`<td class="${cls}">${data[dept][name][fmt(d)] || ""}</td>`)
+      })
+      rows.push(`<tr>${cells.join("")}</tr>`)
+    })
+
+  addBlock("Reception", ws.Reception)
+  addBlock("OPD", ws.OPD)
+  addBlock("CallCenter", ws.CallCenter)
+  addBlock("AppointmentDesk", ws.AppointmentDesk)
+
+  return `<section class="week-card" data-w="${idx}">
+    <div class="week-head">
+      <span class="week-badge">Week ${idx}</span>
+      <span class="week-range">${fmt(weekDays[0])} → ${fmt(weekDays.at(-1))}</span>
+    </div>
+    <div class="table-scroll"><table>${thead}<tbody>${rows.join("")}</tbody></table></div>
+    ${statsHTML(weekDays, ws)}
+  </section>`
+}
+
+/* ── Legend ── */
+function renderLegend() {
+  const el = document.getElementById("legend")
+  let h = '<span class="legend-label">Shifts</span>'
+  LEGEND.forEach(l => { h += `<span class="legend-item"><span class="legend-dot badge ${l.cls}"></span>${l.label}</span>` })
+  h += `<span class="legend-item"><span class="legend-dot" style="background:var(--shift-off-bg);border:1px solid var(--shift-off-border)"></span>Off</span>`
+  el.innerHTML = h
+}
+
+/* ── Render Month ── */
+function renderMonth(y, m) {
+  const weeks = splitWeeks(y, m)
+  const container = document.getElementById("weeks")
+  const tabs = document.getElementById("tabs")
+
+  container.innerHTML = ""
+  tabs.innerHTML = ""
+  cachedWeeks = { y, m, data: [] }
+
+  weeks.forEach((days, i) => {
+    const ws = buildWeek(days)
+    cachedWeeks.data.push({ days, ws })
+    container.insertAdjacentHTML("beforeend", tableHTML(days, ws, i + 1))
+    tabs.insertAdjacentHTML("beforeend", `<button class="tab" data-w="${i+1}">Week ${i+1}</button>`)
+  })
+
+  document.getElementById("month-name").textContent = `${MONTHS[m]} ${y}`
+
+  const today = new Date()
+  let active = 1
+  if (today.getFullYear() === y && today.getMonth() === m) {
+    const idx = weeks.findIndex(w => w.some(d => d.getDate() === today.getDate() && d.getMonth() === today.getMonth()))
+    if (idx >= 0) active = idx + 1
+  }
+
+  viewAll ? showAll() : activate(active)
+
+  tabs.onclick = e => {
+    const w = e.target.dataset.w
+    if (w) { viewAll = false; updateToggle(); activate(+w) }
+  }
+
+  saveState()
+}
+
+/* ── Tab activation ── */
+function activate(n) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", +t.dataset.w === n))
+  document.querySelectorAll(".week-card").forEach(w => {
+    const match = +w.dataset.w === n
+    w.classList.toggle("hidden", !match)
+    if (match) { w.style.animation = "none"; w.offsetHeight; w.style.animation = "" }
+  })
+}
+
+function showAll() {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"))
+  document.querySelectorAll(".week-card").forEach(w => {
+    w.classList.remove("hidden")
+    w.style.animation = "none"; w.offsetHeight; w.style.animation = ""
+  })
+}
+
+function updateToggle() {
+  const btn = document.getElementById("view-toggle")
+  btn.classList.toggle("active", viewAll)
+  btn.querySelector("span") && (btn.querySelector("span").textContent = viewAll ? "Tabbed" : "All Weeks")
+  // Update text content after icon
+  const svg = btn.querySelector("svg").outerHTML
+  btn.innerHTML = svg + (viewAll ? " Tabbed" : " All Weeks")
+}
+
+/* ── Excel Download ── */
+function dlWeek(table, name) {
+  if (!table) return
+  const now = new Date()
+  const pad = n => String(n).padStart(2, "0")
+  const ds = `${pad(now.getDate())} ${now.toLocaleString("en-US",{month:"short"})} ${now.getFullYear()}`
+  let h = now.getHours(), mi = pad(now.getMinutes())
+  const ap = h >= 12 ? "PM" : "AM"
+  h = h % 12 || 12
+  const ts = `${pad(h)}.${mi} ${ap}`
+
+  const style = `<style>
+    body{background:#1e263d;margin:0}
+    table{margin:36px auto;background:#262f49;border-radius:18px;border-collapse:separate!important;border-spacing:0;box-shadow:0 6px 40px #0006;font-family:Inter,Segoe UI,sans-serif}
+    thead th{background:linear-gradient(90deg,#33408e,#5b7cfa 60%,#30c9e8);font-size:1.05rem;color:#f3f7ff;border-right:1.5px solid #253a65;border-bottom:2.5px solid #3c6ee0;padding:14px 12px;font-weight:bold;text-align:center}
+    thead tr:nth-child(2) th{background:#21305b;color:#dbeafe;font-weight:600;border-bottom:1.5px solid #4f5bbd}
+    tbody th{background:#212a3d;color:#ffe2f1;font-weight:bold;text-align:left;padding:12px;border-right:1px solid #313970;border-bottom:1px solid #2c335a}
+    tbody td{padding:11px 6px;color:#f3f7ff;text-align:center;font-size:1rem;border-right:1px solid #313970;border-bottom:1px solid #242b4f;background:rgba(35,45,63,.91)}
+    tbody tr:nth-child(even) td{background:#293354}
+    .badge,.off{border-radius:8px;padding:5px 9px;font-weight:600;display:inline-block;font-size:1rem}
+    .badge{background:#4750b4;color:#fff}.off{color:#ec6174;background:rgba(240,51,80,.12);border:1px dashed #e67397}
+  </style>`
+
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+    <head><meta charset="utf-8">${style}</head>
+    <body><div style="text-align:center;padding:20px;color:#95b8ff;font-size:1.1rem;font-weight:600">${name} | ${ds} ${ts}</div>${table.outerHTML}</body></html>`
+
+  const blob = new Blob([html], { type: "application/vnd.ms-excel" })
+  const a = document.createElement("a")
+  a.href = URL.createObjectURL(blob)
+  a.download = `${name} - ${ds} - ${ts}.xls`
+  a.click()
+  URL.revokeObjectURL(a.href)
+}
+
+/* ── Button Loading ── */
+function btnLoad(btn, text, anim = "spin") {
+  if (btn.dataset.loading === "true") return
+  btn.dataset.loading = "true"
+  btn.classList.add("loading")
+  const orig = btn.dataset.orig || btn.innerHTML
+  btn.dataset.orig = orig
+  let dots = 0
+  btn.innerHTML = `<span class="spinner-${anim}">⏳</span> ${text}`
+  const iv = setInterval(() => { dots = (dots+1)%4; btn.innerHTML = `<span class="spinner-${anim}">⏳</span> ${text}${".".repeat(dots)}` }, 350)
+  return msg => {
+    clearInterval(iv)
+    btn.innerHTML = `✓ ${msg}`
+    btn.classList.remove("loading")
+    setTimeout(() => { btn.innerHTML = orig; btn.dataset.loading = "false" }, 1000)
   }
 }
+
+/* ── Theme ── */
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute("data-theme")
+  document.documentElement.setAttribute("data-theme", cur === "dark" ? "light" : "dark")
+  saveState()
+}
+
+/* ── Fullscreen ── */
+function toggleFS() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {})
+  else document.exitFullscreen().catch(() => {})
+}
+
+/* ── Month Nav ── */
+function prevMonth() { currentDate.setMonth(currentDate.getMonth() - 1); renderMonth(currentDate.getFullYear(), currentDate.getMonth()) }
+function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); renderMonth(currentDate.getFullYear(), currentDate.getMonth()) }
+function goToday() { currentDate = new Date(); renderMonth(currentDate.getFullYear(), currentDate.getMonth()) }
+
+/* ── Keyboard ── */
+function onKey(e) {
+  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return
+  if (e.ctrlKey || e.metaKey) {
+    if (e.key === "ArrowLeft") { e.preventDefault(); prevMonth() }
+    else if (e.key === "ArrowRight") { e.preventDefault(); nextMonth() }
+  } else {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault()
+      const a = document.querySelector(".tab.active")
+      if (a && +a.dataset.w > 1) { viewAll = false; updateToggle(); activate(+a.dataset.w - 1) }
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault()
+      const a = document.querySelector(".tab.active")
+      const total = document.querySelectorAll(".tab").length
+      if (a && +a.dataset.w < total) { viewAll = false; updateToggle(); activate(+a.dataset.w + 1) }
+    }
+  }
+}
+
+/* ── Init ── */
+function init() {
+  loadState()
+  renderLegend()
+  renderMonth(currentDate.getFullYear(), currentDate.getMonth())
+
+  document.getElementById("regen").onclick = () => {
+    const done = btnLoad(document.getElementById("regen"), "Generating")
+    setTimeout(() => { renderMonth(currentDate.getFullYear(), currentDate.getMonth()); done("Ready!") }, 600)
+  }
+
+  document.getElementById("dl").onclick = () => {
+    const done = btnLoad(document.getElementById("dl"), "Exporting", "bounce")
+    setTimeout(() => {
+      const t = document.querySelector(".week-card:not(.hidden) table")
+      const n = document.querySelector(".tab.active")?.textContent.trim() || "Week"
+      dlWeek(t, n); done("Done!")
+    }, 500)
+  }
+
+  document.getElementById("dl-all").onclick = () => {
+    const done = btnLoad(document.getElementById("dl-all"), "Exporting", "bounce")
+    setTimeout(() => {
+      document.querySelectorAll(".week-card table").forEach((t, i) => setTimeout(() => dlWeek(t, `Week ${i+1}`), i * 400))
+      done("Done!")
+    }, 500)
+  }
+
+  document.getElementById("view-toggle").onclick = () => {
+    viewAll = !viewAll
+    updateToggle()
+    if (viewAll) showAll()
+    else {
+      const today = new Date()
+      let a = 1
+      if (cachedWeeks && today.getFullYear() === cachedWeeks.y && today.getMonth() === cachedWeeks.m) {
+        const idx = cachedWeeks.data.findIndex(w => w.days.some(d => d.getDate() === today.getDate() && d.getMonth() === today.getMonth()))
+        if (idx >= 0) a = idx + 1
+      }
+      activate(a)
+    }
+  }
+
+  document.getElementById("theme-toggle").onclick = toggleTheme
+  document.getElementById("fullscreen-btn").onclick = toggleFS
+  document.getElementById("prev-month").onclick = prevMonth
+  document.getElementById("next-month").onclick = nextMonth
+  document.getElementById("go-today").onclick = goToday
+  document.addEventListener("keydown", onKey)
+}
+
+document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", init) : init()
