@@ -1,109 +1,551 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Employee Shift Scheduler</title>
-    <meta name="description" content="Auto-generate weekly employee shift rosters with smart scheduling rules, week navigation, and Excel export." />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>" />
+    <title>July 2026 - Clinic Employee Shift Scheduler</title>
+    <meta name="description" content="Editorial weekly shift scheduler for clinic staff across Reception, OPD, Call Center, and Appointment Desk. Paper planner aesthetics with smart automated scheduling rules." />
+    
+    <!-- Editorial Typography: Fraunces (Display Serif) & Inter (Clean Sans) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <link rel="stylesheet" href="styles.css?v=2" />
   </head>
   <body>
-    <div class="app">
+    <div class="app-container">
 
-      <!-- ── Top Bar ── -->
+      <!-- ── Region 1: Sticky Top Bar (~68px) ── -->
       <header class="topbar">
-        <div class="topbar-inner">
-          <div class="brand">
-            <div class="brand-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            </div>
-            <div>
-              <h1>Shift Scheduler</h1>
-              <p class="brand-sub">Smart weekly roster generator</p>
+        <div class="topbar-left">
+          <!-- Mobile Sidebar Toggle -->
+          <button id="btn-sidebar-toggle" class="btn-sidebar-toggle" aria-label="Toggle navigation sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+
+          <!-- Small Terracotta Rounded-Square Mark with Asterisk Glyph -->
+          <div class="brand-mark" title="Clinic Employee Shift Scheduler">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="3" x2="12" y2="21"></line>
+              <line x1="4.22" y1="7.78" x2="19.78" y2="16.22"></line>
+              <line x1="4.22" y1="16.22" x2="19.78" y2="7.78"></line>
+            </svg>
+          </div>
+
+          <!-- Serif Month Title: 'July 2026' (Month in ink, Year in lighter weight) -->
+          <div class="month-title-wrap">
+            <h1 class="month-title">
+              <span id="topbar-month-text">July</span>
+              <span class="year-light" id="topbar-year-text">2026</span>
+            </h1>
+          </div>
+
+          <!-- Today Pill with Prev/Next Week Arrows -->
+          <div class="topbar-nav-cluster">
+            <button id="btn-today" class="btn-today-pill" title="Jump to today (T)">Today</button>
+            <div class="nav-arrows">
+              <button id="btn-prev-nav" class="btn-nav-arrow" aria-label="Previous week" title="Previous week (←)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <button id="btn-next-nav" class="btn-nav-arrow" aria-label="Next week" title="Next week (→)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
             </div>
           </div>
-          <div class="topbar-actions">
-            <button id="theme-toggle" class="icon-btn" title="Toggle theme">
-              <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-              <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-            </button>
-            <button id="fullscreen-btn" class="icon-btn" title="Fullscreen">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
-            </button>
+        </div>
+
+        <div class="topbar-right">
+          <!-- View Segmented Switcher: By Department (default) + Week Timeline + Day + Month -->
+          <nav class="segmented-switcher" aria-label="Calendar view switcher">
+            <button class="segmented-btn active matrix-chip" data-view="roster" title="View Schedule Divided by Department Sections">By Department</button>
+            <button class="segmented-btn" data-view="week" title="Weekly Visual Time Grid">Week Timeline</button>
+            <button class="segmented-btn" data-view="day" title="Single Day Schedule">Day</button>
+            <button class="segmented-btn" data-view="month" title="Monthly Calendar">Month</button>
+          </nav>
+
+          <!-- Search Input with Magnifying Glass Icon -->
+          <div class="search-container">
+            <svg class="search-icon-pos" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="schedule-search" class="search-input-box" placeholder="Search staff, shifts, depts..." aria-label="Search schedule" />
           </div>
+
+          <!-- Terracotta 'New Shift' Button with Plus Icon -->
+          <button id="btn-new-event" class="btn-primary-terracotta" title="Assign a new employee shift">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>+ New Shift</span>
+          </button>
+
+          <!-- Prominent Quick Action Tools for Shift Scheduler -->
+          <button id="btn-quick-regen" class="btn-secondary-pill" title="Refresh & re-generate weekly roster with department rules (⟳)">
+            <svg class="refresh-icon-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+            </svg>
+            <span>Refresh Schedule</span>
+          </button>
+
+          <button id="btn-quick-export" class="btn-secondary-pill" title="Download Excel Schedule (.xlsx)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Export Excel</span>
+          </button>
+
+          <!-- Circular Avatar with Initials -->
+          <div class="avatar-pill" title="Suraj Khanna - Shift Manager">SK</div>
         </div>
       </header>
 
-      <!-- ── Main Content ── -->
-      <main class="main">
+      <!-- ── Main App Body ── -->
+      <div class="app-body">
 
-        <!-- Month Navigator -->
-        <div class="month-strip">
-          <button id="prev-month" class="nav-arrow" aria-label="Previous month">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          </button>
-          <div class="month-center">
-            <span class="month-label" id="month-name">June 2026</span>
-            <button class="pill-btn" id="go-today">Today</button>
+        <!-- ── Region 2: Fixed 264px Left Sidebar ── -->
+        <aside class="sidebar" id="app-sidebar">
+          
+          <!-- Top: Mini-Month Picker -->
+          <div class="mini-month-card">
+            <div class="mini-month-header">
+              <span class="mini-month-title" id="mini-month-title-text">July 2026</span>
+              <div class="mini-month-nav">
+                <button id="btn-mini-prev" class="mini-nav-arrow" aria-label="Previous mini month">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                </button>
+                <button id="btn-mini-next" class="mini-nav-arrow" aria-label="Next mini month">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <!-- Weekday initials: Mon-first -->
+            <div class="mini-month-weekdays">
+              <span>M</span>
+              <span>T</span>
+              <span>W</span>
+              <span>T</span>
+              <span>F</span>
+              <span>S</span>
+              <span>S</span>
+            </div>
+            <!-- Dynamic 7-column day cells -->
+            <div class="mini-month-grid" id="mini-month-grid">
+              <!-- Populated by JavaScript -->
+            </div>
           </div>
-          <button id="next-month" class="nav-arrow" aria-label="Next month">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-          </button>
-        </div>
 
-        <!-- Action Bar -->
-        <div class="action-bar">
-          <div class="action-group">
-            <button id="regen" class="btn btn-primary">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-              Regenerate
-            </button>
-            <button id="dl" class="btn btn-ghost">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              Download
-            </button>
-            <button id="dl-all" class="btn btn-ghost">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              Export All
-            </button>
+          <!-- Middle: 'DEPARTMENTS & ROSTERS' Checklist -->
+          <div class="sidebar-section">
+            <div class="sidebar-eyebrow">DEPARTMENTS &amp; ROSTERS</div>
+            <div class="calendars-checklist" id="calendars-checklist">
+              <div class="calendar-row is-active" data-cat="reception">
+                <div class="calendar-label-left">
+                  <span class="color-dot dot-work"></span>
+                  <span>Reception (GF)</span>
+                </div>
+                <div class="calendar-check-box">✓</div>
+              </div>
+              <div class="calendar-row is-active" data-cat="opd">
+                <div class="calendar-label-left">
+                  <span class="color-dot dot-personal"></span>
+                  <span>OPD (1F)</span>
+                </div>
+                <div class="calendar-check-box">✓</div>
+              </div>
+              <div class="calendar-row is-active" data-cat="callcenter">
+                <div class="calendar-label-left">
+                  <span class="color-dot dot-meetings"></span>
+                  <span>Call Center (B1)</span>
+                </div>
+                <div class="calendar-check-box">✓</div>
+              </div>
+              <div class="calendar-row is-active" data-cat="appt">
+                <div class="calendar-label-left">
+                  <span class="color-dot dot-health"></span>
+                  <span>Appointment Desk (1F)</span>
+                </div>
+                <div class="calendar-check-box">✓</div>
+              </div>
+              <div class="calendar-row is-active" data-cat="leaves">
+                <div class="calendar-label-left">
+                  <span class="color-dot dot-birthdays"></span>
+                  <span>Staff Leaves &amp; Offs</span>
+                </div>
+                <div class="calendar-check-box">✓</div>
+              </div>
+            </div>
           </div>
-          <div class="action-group">
-            <button id="view-toggle" class="btn btn-outline">
-              <svg class="icon-grid" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-              All Weeks
-            </button>
+
+          <!-- Bottom: 'UP NEXT' Mini-Agenda -->
+          <div class="sidebar-section">
+            <div class="sidebar-eyebrow">UP NEXT</div>
+            <div class="up-next-list" id="up-next-list">
+              <!-- Populated dynamically: 2-3 agenda items -->
+            </div>
           </div>
+
+        </aside>
+
+        <!-- ── Region 3: Main Scheduling Viewport ── -->
+        <main class="main-viewport" id="main-viewport">
+
+          <!-- ── View 1: Week View (Timeline / Grid) ── -->
+          <section class="week-view-wrapper" id="view-week" style="display: none;">
+            
+            <!-- Department Quick Filter & Grid Mode Sub-Bar -->
+            <div class="calendar-subbar">
+              <div class="calendar-dept-filters" id="calendar-dept-filters">
+                <span class="subbar-label">FILTER DEPT:</span>
+                <button class="dept-chip-btn active" data-dept="all">
+                  <span class="dept-chip-indicator" style="background-color: var(--terracotta);"></span>
+                  <span>All Staff (12)</span>
+                </button>
+                <button class="dept-chip-btn" data-dept="reception">
+                  <span class="dept-chip-indicator" style="background-color: var(--fam-terracotta-bar);"></span>
+                  <span>Reception · GF (3)</span>
+                </button>
+                <button class="dept-chip-btn" data-dept="opd">
+                  <span class="dept-chip-indicator" style="background-color: var(--fam-sage-bar);"></span>
+                  <span>OPD · 1F (4)</span>
+                </button>
+                <button class="dept-chip-btn" data-dept="callcenter">
+                  <span class="dept-chip-indicator" style="background-color: var(--fam-dusty-bar);"></span>
+                  <span>Call Center · B1 (3)</span>
+                </button>
+                <button class="dept-chip-btn" data-dept="appt">
+                  <span class="dept-chip-indicator" style="background-color: var(--fam-amber-bar);"></span>
+                  <span>Appointment Desk · 1F (2)</span>
+                </button>
+                <button class="dept-chip-btn" data-dept="leaves">
+                  <span class="dept-chip-indicator" style="background-color: var(--fam-birthday-bar);"></span>
+                  <span>Staff Leaves / Off</span>
+                </button>
+              </div>
+
+              <div class="calendar-mode-controls">
+                <span class="subbar-label">LAYOUT:</span>
+                <div class="mode-pill-group">
+                  <button class="mode-pill-btn active" id="btn-mode-adaptive" title="Spacious cascading cards with full employee names">Cascade Deck</button>
+                  <button class="mode-pill-btn" id="btn-mode-lanes" title="Dedicated Department Lanes across the week">Dept Lanes</button>
+                  <button class="mode-pill-btn" id="btn-mode-board" title="Daily shift card board organized chronologically">Shift Board</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 1. Day-Header Row -->
+            <div class="day-header-row" id="week-day-header-row">
+              <!-- Timezone Chip in Left Gutter -->
+              <div class="hour-gutter-header">
+                <span class="timezone-chip" title="Timezone GMT-7 (Pacific / Mountain)">GMT-7</span>
+              </div>
+              <!-- 7 Day Header Columns -->
+              <div class="day-header-cols-container" id="day-headers-container">
+                <!-- Dynamically populated with MON 6, TUE 7, ... THU 9 (terracotta pill), etc. -->
+              </div>
+            </div>
+
+            <!-- 2. Hairline-Bounded All-Day Row -->
+            <div class="all-day-row" id="week-all-day-row">
+              <div class="all-day-gutter">all-day</div>
+              <div class="all-day-cols-container">
+                <!-- 7 column background vertical lines -->
+                <div class="all-day-grid-lines" id="all-day-grid-lines"></div>
+                <!-- Multi-day spanning bands and single-day items -->
+                <div class="all-day-events-track" id="all-day-events-track">
+                  <!-- Spanning chips populated via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Scrollable Hourly Time Grid (~7 AM to 9 PM) -->
+            <div class="time-grid-scroll-area" id="time-grid-scroll-area">
+              <div class="time-grid-table">
+                <!-- Shared ~58px Left Hour Gutter -->
+                <div class="hour-gutter-col" id="hour-gutter-col">
+                  <!-- 7 AM to 9 PM ticks -->
+                </div>
+
+                <!-- 7 Relative Day Columns with Grid Lines and Event Blocks -->
+                <div class="day-columns-container" id="day-columns-container">
+                  <!-- Hour lines and half-hour sub-lines background -->
+                  <div class="grid-lines-background" id="grid-lines-background"></div>
+
+                  <!-- 7 Day Event Block Columns (Col 0 to Col 6) -->
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Alternate View: Daily Shift Board (Kanban Roster by Day) -->
+            <div class="week-board-scroll-area" id="week-board-scroll-area" style="display: none;">
+              <div class="week-board-grid" id="week-board-grid">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+          </section>
+
+          <!-- ── View 2: Day View ── -->
+          <section class="day-view-wrapper" id="view-day" style="display: none;">
+            <div class="day-view-header">
+              <div class="day-view-header-left">
+                <span class="sidebar-eyebrow" id="day-view-weekday-sub">THURSDAY</span>
+                <div class="day-view-title-row">
+                  <h2 class="day-view-title-big" id="day-view-title">July 9, 2026</h2>
+                  <span id="day-view-today-badge" class="day-view-today-badge" style="display: none;">Today</span>
+                </div>
+                <div id="day-view-leaves-strip" class="day-view-leaves-strip"></div>
+              </div>
+              <div class="day-view-nav-cluster">
+                <button id="btn-day-today" class="btn-ghost-sm" title="Go to today's schedule">Today</button>
+                <button id="btn-day-prev" class="btn-nav-arrow" aria-label="Previous day" title="Previous day (←)">‹</button>
+                <button id="btn-day-next" class="btn-nav-arrow" aria-label="Next day" title="Next day (→)">›</button>
+              </div>
+            </div>
+            <div class="time-grid-scroll-area" id="day-view-scroll-area">
+              <div class="time-grid-table">
+                <div class="hour-gutter-col" id="day-view-hour-gutter"></div>
+                <div class="day-columns-container" style="grid-template-columns: 1fr;" id="day-view-col-container">
+                  <div class="grid-lines-background" id="day-view-lines-bg"></div>
+                  <div class="day-grid-column" id="day-view-events-col"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ── View 3: Month View ── -->
+          <section class="month-view-wrapper" id="view-month" style="display: none;">
+            <div class="roster-matrix-toolbar">
+              <div class="roster-matrix-title-group">
+                <h2 id="month-view-title-heading">July 2026 Overview</h2>
+                <p>Click any day cell to open the weekly schedule.</p>
+              </div>
+            </div>
+            <div class="month-calendar-grid" id="month-view-grid">
+              <!-- Populated by JS -->
+            </div>
+          </section>
+
+          <!-- ── View 4: By Department View (Divided by Department Sections) ── -->
+          <section class="roster-matrix-wrapper" id="view-roster">
+            <div class="roster-matrix-toolbar">
+              <div class="roster-matrix-title-group">
+                <h2>Weekly Schedule - By Department</h2>
+                <p>Hospital staff shifts divided into clear departmental sections with interactive swapping</p>
+              </div>
+              <div style="display:flex; align-items:center; gap: 10px; flex-wrap:wrap;">
+                <div class="roster-view-mode-group">
+                  <button id="btn-roster-layout-sections" class="roster-mode-btn active" title="Show divided by Department Sections">📋 Department Sections</button>
+                  <button id="btn-roster-layout-combined" class="roster-mode-btn" title="Show unified table">📊 Unified Table</button>
+                </div>
+                <div class="roster-week-tabs" id="roster-week-tabs">
+                  <!-- Week 1, Week 2, Week 3, ... tabs -->
+                </div>
+                <button id="btn-roster-refresh" class="btn-refresh-roster" title="Refresh & re-generate shifts with balanced rules (⟳)">
+                  <svg class="refresh-icon-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                  </svg>
+                  <span>Refresh Shifts</span>
+                </button>
+                <button id="btn-matrix-dl" class="btn-primary-terracotta" style="height:32px;" title="Export formatted Excel workbook (.xlsx) with all department rosters">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  <span>Export Excel</span>
+                </button>
+                <button id="btn-matrix-csv" class="btn-refresh-roster" style="height:32px; padding:0 11px;" title="Export clean tabular CSV (.csv) for payroll/HR">
+                  <span>Export CSV</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Department Sections & Tables Container -->
+            <div class="roster-content-container" id="roster-table-container">
+              <!-- Dynamically populated with 4 distinct Department Section cards or unified table -->
+            </div>
+          </section>
+
+        </main>
+      </div>
+
+      <!-- ── Modal: Assign Employee Shift ── -->
+      <div class="modal-backdrop" id="modal-new-event">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h3 class="modal-title">Assign Employee Shift</h3>
+            <button class="modal-close-btn" id="btn-close-new-modal" aria-label="Close dialog">✕</button>
+          </div>
+          <form id="form-new-event">
+            <div class="modal-body">
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Employee</label>
+                  <select id="select-employee" class="form-select">
+                    <optgroup label="Reception (GF)">
+                      <option value="Sagar">Sagar (Reception)</option>
+                      <option value="Roshan">Roshan (Reception)</option>
+                      <option value="Karan">Karan (Night Shift)</option>
+                    </optgroup>
+                    <optgroup label="OPD (1F)">
+                      <option value="Anagha">Anagha (OPD 1F)</option>
+                      <option value="Shraddha Tipale">Shraddha Tipale (OPD)</option>
+                      <option value="Shubhangi">Shubhangi (OPD / CC)</option>
+                      <option value="Mamta">Mamta (OPD 1F)</option>
+                    </optgroup>
+                    <optgroup label="Call Center (B1)">
+                      <option value="Jayshree">Jayshree (Call Center)</option>
+                      <option value="Shraddha P">Shraddha P (Call Center)</option>
+                      <option value="Prasad">Prasad (Call Center)</option>
+                    </optgroup>
+                    <optgroup label="Appointment Desk (1F)">
+                      <option value="Vanita">Vanita (Appt Desk)</option>
+                      <option value="Gaurav">Gaurav (Appt Desk)</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Department</label>
+                  <select id="select-event-category" class="form-select">
+                    <option value="reception">Reception (GF)</option>
+                    <option value="opd">OPD (1F)</option>
+                    <option value="callcenter">Call Center (B1)</option>
+                    <option value="appt">Appointment Desk (1F)</option>
+                    <option value="leaves">Staff Leave / Off-Day</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Shift Timing Preset</label>
+                <select id="select-shift-preset" class="form-select">
+                  <option value="7.0-15.5">7:00 AM - 3:30 PM (7 AM Morning Shift)</option>
+                  <option value="7.5-16.0">7:30 AM - 4:00 PM (7:30 AM Shift)</option>
+                  <option value="8.0-16.5">8:00 AM - 4:30 PM (8:00 AM Shift)</option>
+                  <option value="9.0-17.5">9:00 AM - 5:30 PM (9:00 AM General OPD)</option>
+                  <option value="9.5-18.0">9:30 AM - 6:00 PM (9:30 AM Mid-Day Shift)</option>
+                  <option value="10.5-19.0">10:30 AM - 7:00 PM (10:30 AM Late Shift)</option>
+                  <option value="11.5-20.0">11:30 AM - 8:00 PM (11:30 AM Afternoon Shift)</option>
+                  <option value="14.0-21.0" selected>2:00 PM - 10:00 PM (2 PM Evening Shift)</option>
+                  <option value="20.0-21.0">8:00 PM - 8:00 AM (Night Shift)</option>
+                  <option value="off">Full-Day Scheduled Off / Leave</option>
+                </select>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Day of Week</label>
+                  <select id="select-event-day" class="form-select">
+                    <option value="0">Monday, Jul 6</option>
+                    <option value="1">Tuesday, Jul 7</option>
+                    <option value="2">Wednesday, Jul 8</option>
+                    <option value="3" selected>Thursday, Jul 9 (Today)</option>
+                    <option value="4">Friday, Jul 10</option>
+                    <option value="5">Saturday, Jul 11</option>
+                    <option value="6">Sunday, Jul 12</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Station / Desk</label>
+                  <input type="text" id="input-event-location" class="form-input" placeholder="e.g. Front Counter, Station B1" value="Front Counter" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Assignment Notes (Optional)</label>
+                <textarea id="input-event-notes" class="form-textarea" rows="2" placeholder="Shift coverage notes or swap details..."></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn-secondary" id="btn-cancel-new-modal">Cancel</button>
+              <button type="submit" class="btn-primary-terracotta">Assign Shift</button>
+            </div>
+          </form>
         </div>
+      </div>
 
-        <!-- Week Tabs -->
-        <div class="tab-bar" id="tabs">
-          <!-- Populated by JS -->
+      <!-- ── Modal: Employee Shift Detail & Editor ── -->
+      <div class="modal-backdrop" id="modal-event-detail">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h3 class="modal-title" id="detail-modal-title">Employee Shift Details</h3>
+            <button class="modal-close-btn" id="btn-close-detail-modal" aria-label="Close dialog">✕</button>
+          </div>
+          <form id="form-edit-shift">
+            <div class="modal-body">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                <span class="event-detail-chip" id="detail-modal-badge">Reception</span>
+                <span id="detail-modal-day" style="font-size:12px; font-weight:600; color:var(--ink-secondary);">Thursday, Jul 9</span>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Shift Timing Preset</label>
+                <select id="detail-select-shift" class="form-select">
+                  <option value="7">7:00 AM - 3:30 PM (7 AM Morning Shift)</option>
+                  <option value="7:30">7:30 AM - 4:00 PM (7:30 AM Shift)</option>
+                  <option value="8:00">8:00 AM - 4:30 PM (8:00 AM Shift)</option>
+                  <option value="9:00">9:00 AM - 5:30 PM (9:00 AM General OPD)</option>
+                  <option value="9:30">9:30 AM - 6:00 PM (9:30 AM Mid-Day Shift)</option>
+                  <option value="10:30">10:30 AM - 7:00 PM (10:30 AM Late Shift)</option>
+                  <option value="11:30">11:30 AM - 8:00 PM (11:30 AM Afternoon Shift)</option>
+                  <option value="2">2:00 PM - 10:00 PM (2 PM Evening Shift)</option>
+                  <option value="Night">8:00 PM - 8:00 AM (Night Shift)</option>
+                  <option value="Off">Scheduled Off / Rest Day</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Swap Shift with Colleague (Same Day)</label>
+                <select id="detail-select-swap" class="form-select">
+                  <option value="">-- No Swap (Update Current Employee Only) --</option>
+                </select>
+                <span style="font-size:10.5px; color:var(--ink-secondary); margin-top:3px; display:block;">Exchanges shift timings between both staff members to maintain department balance.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Station / Coverage Notes</label>
+                <input type="text" id="detail-input-notes" class="form-input" placeholder="Front Counter, Desk 1, swap details..." />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn-danger" id="btn-delete-event">Mark as Off</button>
+              <button type="button" class="btn-secondary" id="btn-dismiss-detail">Cancel</button>
+              <button type="submit" class="btn-primary-terracotta" id="btn-save-shift">Save Change</button>
+            </div>
+          </form>
         </div>
+      </div>
 
-        <!-- Schedule Area -->
-        <div id="weeks">
-          <!-- Populated by JS -->
-        </div>
-
-        <!-- Shift Legend (inline, compact) -->
-        <div class="legend-strip" id="legend">
-          <!-- Populated by JS -->
-        </div>
-
-      </main>
-
-      <!-- ── Footer ── -->
-      <footer class="footer">
-        <span>Made with ❤️ by Suraj Khanna</span>
-        <span class="footer-sep">·</span>
-        <span class="footer-hint">← → switch weeks · Ctrl+← → switch months</span>
-      </footer>
+      <!-- ── Toast Notification ── -->
+      <div class="toast-notice" id="app-toast">
+        <span id="toast-icon">✓</span>
+        <span id="toast-text">Schedule updated</span>
+      </div>
 
     </div>
-    <script src="logic.js"></script>
+
+    <!-- SheetJS Excel Engine (Local) -->
+    <script src="xlsx.full.min.js"></script>
+    <!-- Application Script -->
+    <script src="logic.js?v=3"></script>
   </body>
 </html>
