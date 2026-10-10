@@ -69,11 +69,24 @@ cd weekly-shift-scheduler
 
 ## 📤 Export Options
 
-- `Download visible week ⇩`  
-Exports the currently visible week to Excel with styled formatting.  
+- `Export Excel (.xlsx)`  
+Generates a multi-sheet OpenXML `.xlsx` spreadsheet using local SheetJS:
+- **Weekly Master**: Clinic-wide roster with all 4 departments and daily on-duty/rest stats.
+- **Department Tabs**: Dedicated sheets for Reception, OPD, Call Center, and Appointment Desk.
+- **Shift Timing Guide**: Reference catalog with exact hours, net durations, and station roles.
+- Formatted row heights, generous column widths, and frozen header panes.
 
-Supports:  
-- **HTML → .xls** export (preserves CSS look)  
+---
+
+## 🚀 Production Roadmap
+
+See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the thorough production feature roadmap, including:
+- Dynamic Staff Management & Custom Department CRUD
+- Healthcare Compliance & Fatigue Engine (11h minimum rest, consecutive day limits)
+- Personal Calendar Sync (`.ics` / Google Calendar / Apple Calendar)
+- Progressive Web App (PWA) with offline support
+- Persistent cPanel MySQL / PHP API architecture
+- Shift Swap Approval Workflows & Workforce Equity Analytics
 
 ---
 
